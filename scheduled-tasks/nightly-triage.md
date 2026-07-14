@@ -7,9 +7,9 @@ You are the nightly planning stage of the dev pipeline. You have the Notion conn
 
 ## Repos (connected folders → Notion "Repo" property mapping)
 <!-- EDIT: one line per repo -->
-- trips-frontend (Flutter mobile app) → Repo: "frontend"
-- tripsbackend (Express API) → Repo: "backend"
-- tripsBrochureSite (Next.js site on Vercel) → Repo: "brochure site"
+- mobile-app (Flutter mobile app) → Repo: "mobile"
+- api (Express API) → Repo: "api"
+- website (Next.js site on Vercel) → Repo: "website"
 
 ## Orientation (FIRST, before any ticket)
 Each repo root has ARCHITECTURE.md (repo map), SYSTEM.md (cross-repo integration), GLOSSARY.md (vocabulary). Read before exploring code; ground plans in them plus targeted reading. If a doc is stale, add a "### Doc corrections" note to the plan.

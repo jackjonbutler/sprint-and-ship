@@ -1,5 +1,5 @@
 ---
-description: Merge, deploy and close a ticket (usage - /ship TT-123)
+description: Merge, deploy and close a ticket (usage - /ship TKT-123)
 allowed-tools: Read, Bash, mcp__notion__*
 ---
 
@@ -7,7 +7,7 @@ allowed-tools: Read, Bash, mcp__notion__*
 
 1. Fetch ticket $ARGUMENTS; find its PR (Branch property / `gh pr list --head <branch>`).
 2. Gates: PR checks green (`gh pr checks`), no unresolved review threads, `AI Stage` = "PR Open". Stop and report if not.
-3. Merge: `gh pr merge --squash --delete-branch`. Squash-commit title: `TT-<id>: <ticket title>`.
+3. Merge: `gh pr merge --squash --delete-branch`. Squash-commit title: `TKT-<id>: <ticket title>`.
 4. Verify deploy per CLAUDE.md DEPLOY config:
    - Vercel: wait for the production deployment of the merge commit, then hit the health/smoke URL.
    - Expo/EAS: trigger the configured build/update channel and report the build link.

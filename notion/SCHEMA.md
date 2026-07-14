@@ -3,7 +3,7 @@
 ## Tasks database (extend your existing one)
 | Property | Type | Values |
 |---|---|---|
-| ID | Unique ID | prefix e.g. TT → tickets referenced as TT-123; branch names contain tt-123 so Notion's GitHub integration auto-links PRs |
+| ID | Unique ID | prefix e.g. TKT → tickets referenced as TKT-123; branch names contain tkt-123 so Notion's GitHub integration auto-links PRs |
 | Status | Status | Backlog / Not started / In progress / QA / Done (+ your own) |
 | AI Stage | Select | Needs Plan · Researching · Plan Ready · Plan Approved · Building · PR Open · Blocked |
 | Branch | Text | written by the agent at branch creation |

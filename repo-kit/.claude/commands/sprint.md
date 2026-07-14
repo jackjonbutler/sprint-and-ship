@@ -9,4 +9,4 @@ This command has been replaced by GSD-style fresh-context execution:
 2. /clear
 3. /next — execute one ticket, then stop
 4. Repeat /clear + /next until done
-Tell Jack this and offer to run /sprint-plan now.
+Tell the user this and offer to run /sprint-plan now.

@@ -13,10 +13,7 @@ Add `.mcp.json` with the Notion MCP (`https://mcp.notion.com/mcp`, http transpor
 Copy `workspace/CLAUDE.md` + `workspace/.claude/` into the PARENT folder containing your repos (must not itself be a git repo). Edit the repo map table and the protected-branch list in `.claude/hooks/guard-main.js`. Open Claude Code here for all sprint work.
 
 ## 4. Scheduled agents (Claude desktop / Cowork)
-Create two scheduled tasks from `scheduled-tasks/*.md`, replacing every `{{PLACEHOLDER}}`:
-- nightly-triage: daily, evening. Attach your repo folders to the task. Needs Notion connector.
-- weekly-ship-and-learn: Sundays. Same folders. Needs Notion + PostHog connectors, GSC access.
-Run each once manually to pre-approve its tool permissions.
+Follow `scheduled-tasks/SETUP.md` — it contains ready-to-paste Cowork prompts that create both tasks, plus the two steps people miss: attaching your repo folders to each task, and one manual "Run now" to pre-approve tool permissions.
 
 ## 5. Telegram (questions + digests)
 @BotFather → /newbot → token. Message your bot once, then GET /getUpdates for your chat_id. Fill both placeholders. Tokens live only in the local task files — never in git.

@@ -2,7 +2,7 @@
 
 **A one-man dev team system**: Notion for tickets and sprints, Claude (Code + scheduled agents) for planning, building, and reviewing, GitHub for PRs — plus a measurement loop that checks whether what you shipped actually worked, and turns the results into build-in-public content.
 
-This is the real system running [Trips Together](https://tripstogether.co.uk) (Flutter app + Express API + Next.js site), published with secrets replaced by `{{PLACEHOLDERS}}`.
+This is a real production system (originally built for a three-repo product: mobile app + API + marketing site), published as a template — all IDs and secrets are `{{PLACEHOLDERS}}`, all names are examples. Point it at your own repos and Notion workspace via INSTALL.md.
 
 ## The loop
 
@@ -21,7 +21,7 @@ branch → build → qa-verifier → code-reviewer → PR
 Review PR → /ship → merges to development
 development → main promotion = deliberate release
         ↓  nightly agent
-Detects actual production releases (Vercel / Komodo / App+Play Store polling)
+Detects actual production releases (instant-deploy hosts, server SHA checks, App/Play Store polling)
         ↓  weekly scheduled agent (Sunday 7pm)
 Ship & Learn: checks each change's success metric FROM ITS LIVE DATE
 (PostHog · Search Console · RevenueCat) → Changelog verdicts →

@@ -15,7 +15,7 @@ process.stdin.on("end", () => {
     const DEFAULT = process.env.DEFAULT_BRANCH || "main";
     if (branch === DEFAULT) {
       console.error(
-        `BLOCKED: you are on '${DEFAULT}'. Create a ticket branch first (feat/tt-<id>-<slug>). See CLAUDE.md golden rule 1.`
+        `BLOCKED: you are on '${DEFAULT}'. Create a ticket branch first (feat/tkt-<id>-<slug>). See CLAUDE.md golden rule 1.`
       );
       process.exit(2); // exit 2 = block the tool call, feed stderr back to Claude
     }

@@ -7,7 +7,7 @@ allowed-tools: Task, Read, Grep, Glob, Bash(git *), mcp__notion__*
 
 You are the planning stage of the pipeline. Do NOT write any application code.
 
-1. Query Notion "Tasks - Tech" (`collection://{{TASKS_DB_COLLECTION_ID}}`) for tickets where `AI Stage` = "Needs Plan" AND `Repo` = REPO_NAME (from CLAUDE.md). If none, say so and stop.
+1. Query Notion the tasks database (`collection://{{TASKS_DB_COLLECTION_ID}}`) for tickets where `AI Stage` = "Needs Plan" AND `Repo` = REPO_NAME (from CLAUDE.md). If none, say so and stop.
 2. For each ticket, oldest first:
    a. Set `AI Stage` = "Researching".
    b. Fetch the full ticket page. Read the description, any comments, linked pages, and sub-tasks.
@@ -43,6 +43,6 @@ How we'll know it worked in production: a specific PostHog event/funnel, GSC que
       S / M / L, plus the main risk and its mitigation.
 
    f. Set `AI Stage` = "Plan Ready".
-3. Finish with a one-line-per-ticket summary: TT-<id> — Plan Ready | Blocked (reason).
+3. Finish with a one-line-per-ticket summary: TKT-<id> — Plan Ready | Blocked (reason).
 
-Rules: never change `Status` or `Sprint` here — sprint assembly is Jack's job. Never set "Plan Approved" yourself; only Jack does that in Notion.
+Rules: never change `Status` or `Sprint` here — sprint assembly is the user's job. Never set "Plan Approved" yourself; only the user does that in Notion.
