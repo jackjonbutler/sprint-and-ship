@@ -30,15 +30,29 @@ weekly report → build-in-public content drafts into a tracked pipeline
 
 Three human decisions per ticket: what to build · approve the plan · approve the PR. Everything else is pipeline.
 
+## Quick start
+
+```
+git clone https://github.com/jackjonbutler/sprint-and-ship.git ~/sprint-and-ship
+cd ~/sprint-and-ship
+bash install.sh        # symlinks skills into ~/.claude/skills (use --copy on Windows without dev mode)
+```
+
+Then follow `INSTALL.md` for the Notion schema, workspace setup, and scheduled agents. Update later with `git pull` — symlinked skills pick changes up automatically.
+
 ## What's in here
 
 | Path | What |
 |---|---|
+| `skills/` | Six `ss-*` skills (sprint-plan, next, work, plan-ticket, ship, triage) — install once, available in every Claude Code session. |
+| `install.sh` / `uninstall.sh` | Idempotent symlink installer, dev-stack style. |
 | `workspace/` | Cross-repo orchestrator: drop into a parent folder containing your repos. Commands route tickets to the right repo. |
-| `repo-kit/` | Per-repo kit: CLAUDE.md config template, commands, subagents, a hook that blocks commits to protected branches. |
+| `repo-kit/` | Per-repo kit (alternative to global skills, plus the agents + guard hook): CLAUDE.md config template, commands, subagents, a hook that blocks commits to protected branches. |
 | `scheduled-tasks/` | Prompts for the two scheduled agents (Claude desktop/Cowork): nightly triage + release detection, weekly Ship & Learn. |
 | `notion/SCHEMA.md` | The Notion setup: ticket properties, Changelog + Content Tracker databases, views. |
 | `docs/` | System design rationale + one-page workflow PDF. |
+| `scripts/sync-kit.sh` | Push kit updates out to your repos (canonical-source flow). |
+| `ATTRIBUTIONS.md` | Where the patterns come from (GSD, Superpowers, gstack, dev-stack). |
 | `INSTALL.md` | Setup, end to end. |
 
 ## Design principles
