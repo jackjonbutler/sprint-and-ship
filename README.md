@@ -44,7 +44,7 @@ Then follow `INSTALL.md` for the Notion schema, workspace setup, and scheduled a
 
 | Path | What |
 |---|---|
-| `skills/` | Six `ss-*` skills (sprint-plan, next, work, plan-ticket, ship, triage) — install once, available in every Claude Code session. |
+| `skills/` | Ten skills: the six `ss-*` pipeline verbs (sprint-plan, next, work, plan-ticket, ship, triage) + `ss-quick` (guarded fast lane) + vendored `sp-brainstorming` (idea → well-formed ticket), `sp-systematic-debugging`, and `gs-plan-eng-review` (deep review for L tickets). |
 | `install.sh` / `uninstall.sh` | Idempotent symlink installer, dev-stack style. |
 | `workspace/` | Cross-repo orchestrator: drop into a parent folder containing your repos. Commands route tickets to the right repo. |
 | `repo-kit/` | Per-repo kit (alternative to global skills, plus the agents + guard hook): CLAUDE.md config template, commands, subagents, a hook that blocks commits to protected branches. |
