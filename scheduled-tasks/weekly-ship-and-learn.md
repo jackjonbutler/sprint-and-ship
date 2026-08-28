@@ -31,7 +31,7 @@ TL;DR (3 bullets) · Shipped & released (table: ticket, repo, Release status, ve
 Each draft = a page IN the Content Tracker: Status "Draft", Platform, Week, Source changes relation, full script in body + closing note on the stat/screenshot to use. Formats: X single + 4-6 tweet thread · LinkedIn narrative (~150-250 words) · TikTok/Reels 30-45s script (hook, 3 beats, CTA) · Instagram carousel (5-7 slides) + caption. Specific, honest, numbers-forward; adapt to what performed. Release moments and Too early → Moved flips are the best stories. Link drafts from the report.
 
 ## 6. Telegram digest
-curl -s -X POST "https://api.telegram.org/bot{{TELEGRAM_BOT_TOKEN}}/sendMessage" -d chat_id={{TELEGRAM_CHAT_ID}} -d parse_mode=HTML --data-urlencode text="<message>"
+curl -s -X POST "https://api.telegram.org/bot{{TELEGRAM_BOT_TOKEN}}/sendMessage" -d chat_id={{TELEGRAM_CHAT_ID_REPORTS}} -d parse_mode=HTML --data-urlencode text="<message>"
 "📊 <b>Ship & Learn — Week of <date></b>" + TL;DR + standout number + verdict/release changes + content nudges + report link. Under 4000 chars.
 
 ## Hard rules

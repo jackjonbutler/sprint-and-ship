@@ -9,9 +9,11 @@ event() { # event <job> <type> <json-extra?>
   printf '{"ts":"%s","job":"%s","type":"%s"%s}\n' "$(date -Iseconds)" "$1" "$2" "${3:+,$3}" >> "$LOGDIR/events.jsonl"
 }
 
-tg() { # tg <text>  (HTML mode)
+tg() { # tg <text> [channel]  — channel: dev (default) | reports
+  local chat="${TELEGRAM_CHAT_ID_DEV:-${TELEGRAM_CHAT_ID}}"
+  [ "${2:-dev}" = "reports" ] && chat="${TELEGRAM_CHAT_ID_REPORTS:-$chat}"
   curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-    -d chat_id="${TELEGRAM_CHAT_ID}" -d parse_mode=HTML --data-urlencode text="$1" > /dev/null || true
+    -d chat_id="$chat" -d parse_mode=HTML --data-urlencode text="$1" > /dev/null || true
 }
 
 sync_repos() { # clone/refresh every repo listed in REPOS="name=url name=url"

@@ -10,3 +10,9 @@ Notion: sprints collection://{{SPRINTS_DB_COLLECTION_ID}}, tasks collection://{{
 4. If you need the user's input at ANY point: set the ticket Blocked with a Notion comment, send Telegram: "❓ <b>TKT-<id></b>: <the question> — reply here as 'TKT-<id>: <answer>' or comment in Notion <url>", mark the manifest line "⚠ waiting", print RESULT:ASKED and stop.
 5. Success → print RESULT:NEXT. Unrecoverable failure → record it in the ticket + manifest, print RESULT:FAILED.
 NEVER: merge PRs, touch protected branches, work on a second ticket, or exceed the plan's scope. Print the RESULT: marker as the last line, always.
+
+
+## How to send Telegram messages
+All messages from this run go to the DEV channel:
+curl -s -X POST "https://api.telegram.org/bot{{TELEGRAM_BOT_TOKEN}}/sendMessage" -d chat_id=$TELEGRAM_CHAT_ID_DEV -d parse_mode=HTML --data-urlencode text="<message>"
+(Escape < > & in content. The chat id is available as $TELEGRAM_CHAT_ID_DEV in the environment.)

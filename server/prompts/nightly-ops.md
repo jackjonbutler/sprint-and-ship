@@ -14,3 +14,9 @@ Tickets Blocked > 3 days: one Telegram reminder listing their questions. Tickets
 If the "Next" or "Current" sprint contains tickets with AI Stage empty or "Needs Plan": run the full ss-sprint-triage procedure now. Otherwise skip.
 
 ## 5. Telegram summary only if anything happened.
+
+
+## How to send Telegram messages
+All messages from this run go to the DEV channel:
+curl -s -X POST "https://api.telegram.org/bot{{TELEGRAM_BOT_TOKEN}}/sendMessage" -d chat_id=$TELEGRAM_CHAT_ID_DEV -d parse_mode=HTML --data-urlencode text="<message>"
+(Escape < > & in content. The chat id is available as $TELEGRAM_CHAT_ID_DEV in the environment.)
