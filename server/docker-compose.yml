@@ -1,0 +1,10 @@
+services:
+  agent:
+    build: { context: .., dockerfile: server/Dockerfile }
+    env_file: .env            # from the private env repo
+    volumes:
+      - repos:/work/repos     # persistent clones
+      - ./prompts:/work/prompts:ro   # filled prompts from the private env repo
+      - logs:/var/log/sprint-and-ship
+      - state:/var/lib/sprint-and-ship
+volumes: { repos: {}, logs: {}, state: {} }

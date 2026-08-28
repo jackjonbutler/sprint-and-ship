@@ -45,3 +45,15 @@ Weekly report sub-pages land here. Under it, two databases:
 | Source changes | Relation → Changelog | |
 
 View: **Pipeline** board grouped by Status.
+
+### Improvement Log
+| Property | Type | Notes |
+|---|---|---|
+| Observation | Title | specific, evidenced |
+| Category | Select | planning · execution · review · merge · infra · docs · process |
+| Ticket / Sprint | Relations | where it was observed |
+| Proposed change | Text | concrete pipeline change |
+| Status | Select | Noted → Scoped (ticket created) / Rejected · Shipped |
+| Source | Select | ticket review · sprint close · manual |
+
+Also add a `pipeline` option to the tasks database's Repo select — improvement tickets flow through the normal pipeline.

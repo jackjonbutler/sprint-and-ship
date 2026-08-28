@@ -28,4 +28,4 @@ description: "Execute the next sprint ticket in a fresh context, routed to its r
     "✅ TKT-<id> done — PR: <url>
     Sprint: <n>/<total>. Next up: TKT-<id2> [repo] — <title> (est: X).
     → /clear, then /next"
-    (Last one: "🏁 Sprint execution complete. Review QA, then /ship each ticket.")
+    (Last one: "🏁 Sprint execution complete. Review QA, /ship each ticket, then /sprint-close to write the summary and hand over.")

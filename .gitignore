@@ -1,3 +1,15 @@
 .DS_Store
 Thumbs.db
 *.local.*
+# secrets & filled config — these belong ONLY in the private env repo
+.env
+*.env
+!*.env.example
+server/prompts/*filled*
+*service-account*.json
+*.pem
+*.key
+tg-offset
+# runtime artifacts
+runs/
+*.jsonl

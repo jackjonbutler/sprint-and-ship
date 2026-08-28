@@ -1,0 +1,6 @@
+[Unit]
+Description=sprint-and-ship nightly ops (answers, releases, sprint triage)
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/sprint-and-ship/server
+ExecStart=/usr/bin/docker compose run --rm agent bin/run-job.sh nightly-ops

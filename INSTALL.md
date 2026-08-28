@@ -12,7 +12,10 @@ Add `.mcp.json` with the Notion MCP (`https://mcp.notion.com/mcp`, http transpor
 ## 3. Workspace (single-window, multi-repo)
 Copy `workspace/CLAUDE.md` + `workspace/.claude/` into the PARENT folder containing your repos (must not itself be a git repo). Edit the repo map table and the protected-branch list in `.claude/hooks/guard-main.js`. Open Claude Code here for all sprint work.
 
-## 4. Scheduled agents (Claude desktop / Cowork)
+## 4a. Always-on server (recommended) 
+Follow `server/README.md`: Hetzner/any Linux box, Docker, systemd timers, private env repo for secrets. Runs planning, overnight builds, release detection, and weekly reports without your desktop. 
+
+## 4b. OR: Scheduled agents on your desktop (Claude/Cowork)
 Follow `scheduled-tasks/SETUP.md` — it contains ready-to-paste Cowork prompts that create both tasks, plus the two steps people miss: attaching your repo folders to each task, and one manual "Run now" to pre-approve tool permissions.
 
 ## 5. Telegram (questions + digests)

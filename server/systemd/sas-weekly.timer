@@ -1,0 +1,7 @@
+[Unit]
+Description=Sunday 19:30
+[Timer]
+OnCalendar=Sun *-*-* 19:30
+Persistent=true
+[Install]
+WantedBy=timers.target

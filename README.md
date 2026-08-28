@@ -44,16 +44,22 @@ Then follow `INSTALL.md` for the Notion schema, workspace setup, and scheduled a
 
 | Path | What |
 |---|---|
-| `skills/` | Ten skills: the six `ss-*` pipeline verbs (sprint-plan, next, work, plan-ticket, ship, triage) + `ss-quick` (guarded fast lane) + vendored `sp-brainstorming` (idea → well-formed ticket), `sp-systematic-debugging`, and `gs-plan-eng-review` (deep review for L tickets). |
+| `skills/` | Twelve skills: `ss-sprint-triage` (plan a whole sprint as one unit — plans that know about each other), `ss-ticket-review` (per-ticket cycle review feeding the Improvement Log), the seven `ss-*` pipeline verbs (sprint-plan, next, work, plan-ticket, ship, triage, sprint-close) + `ss-quick` (guarded fast lane) + vendored `sp-brainstorming` (idea → well-formed ticket), `sp-systematic-debugging`, and `gs-plan-eng-review` (deep review for L tickets). |
 | `install.sh` / `uninstall.sh` | Idempotent symlink installer, dev-stack style. |
 | `workspace/` | Cross-repo orchestrator: drop into a parent folder containing your repos. Commands route tickets to the right repo. |
 | `repo-kit/` | Per-repo kit (alternative to global skills, plus the agents + guard hook): CLAUDE.md config template, commands, subagents, a hook that blocks commits to protected branches. |
-| `scheduled-tasks/` | Prompts for the two scheduled agents (Claude desktop/Cowork): nightly triage + release detection, weekly Ship & Learn. |
+| `scheduled-tasks/` | Prompts for desktop (Cowork) scheduling — the laptop-hosted way to run the agents. |
+| `server/` | Always-on runtime: Docker + systemd timers for a Linux server. Overnight build loop, sprint triage, release detection, weekly reports — no desktop required. Questions reach you on Telegram; reply `TKT-123: answer` and the system picks it up. |
 | `notion/SCHEMA.md` | The Notion setup: ticket properties, Changelog + Content Tracker databases, views. |
 | `docs/` | System design rationale + one-page workflow PDF. |
 | `scripts/sync-kit.sh` | Push kit updates out to your repos (canonical-source flow). |
+| `scripts/secret-scan.sh` | Run before every push — blocks token-shaped strings and env files. Wire as a pre-push hook: `ln -s ../../scripts/secret-scan.sh .git/hooks/pre-push` |
 | `ATTRIBUTIONS.md` | Where the patterns come from (GSD, Superpowers, gstack, dev-stack). |
 | `INSTALL.md` | Setup, end to end. |
+
+## The self-improving loop
+
+Every ticket ends with `ss-ticket-review`: not a code review, a *cycle* review — was the plan accurate, did research miss things, did the gates catch anything, where was the friction? Observations land in an **Improvement Log** with concrete proposed changes. At `ss-sprint-close`, they're synthesized: recurring patterns become tickets with `Repo = pipeline`, planned and built by the same pipeline they improve — through the same human approval gates as product code. Max 3 pipeline tickets per sprint, and one-off noise gets explicitly rejected, so the system improves itself without disappearing up itself.
 
 ## Design principles
 
