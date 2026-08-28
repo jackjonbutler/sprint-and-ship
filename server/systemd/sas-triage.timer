@@ -1,0 +1,7 @@
+[Unit]
+Description=nightly 19:30 (after ops)
+[Timer]
+OnCalendar=*-*-* 19:30
+Persistent=true
+[Install]
+WantedBy=timers.target

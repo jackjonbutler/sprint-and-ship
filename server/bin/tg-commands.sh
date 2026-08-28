@@ -34,7 +34,7 @@ while true; do
     [ "$FROM" != "$OWNER" ] && continue   # only the owner commands the system
     CMD=$(echo "$MSG" | tr '[:upper:]' '[:lower:]' | xargs)
     case "$CMD" in
-      plan|"run plan"|triage)  run_locked "$CHAT" "Sprint planning (nightly-ops)" bin/run-job.sh nightly-ops & ;;
+      plan|"run plan"|triage)  run_locked "$CHAT" "Sprint planning" bin/run-job.sh sprint-triage & ;;
       build|"run build")       run_locked "$CHAT" "Night build" bin/night-build.sh & ;;
       status)
         LAST=$(tail -3 "$LOGDIR/events.jsonl" 2>/dev/null | jq -r '"\(.ts | split("T")[1] | split("+")[0]) \(.job) \(.type)"' | paste -sd '; ' -)

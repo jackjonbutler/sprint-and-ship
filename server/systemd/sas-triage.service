@@ -1,0 +1,6 @@
+[Unit]
+Description=sprint-and-ship sprint triage (bounded, one wave per run)
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/sprint-and-ship/server
+ExecStart=/usr/bin/docker compose run --rm agent bin/run-job.sh sprint-triage

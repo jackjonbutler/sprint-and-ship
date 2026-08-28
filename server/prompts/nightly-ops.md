@@ -15,7 +15,7 @@ Read the offset in /var/lib/sprint-and-ship/tg-offset (0 if missing). curl getUp
 Tickets Blocked > 3 days: one Telegram reminder listing their questions. Tickets stuck in Researching/Building with no run activity: reset to their previous stage and note it.
 
 ## 4. Sprint triage trigger
-If the "Next" or "Current" sprint contains tickets with AI Stage empty or "Needs Plan": run the full ss-sprint-triage procedure now. Otherwise skip.
+If the "Next" sprint contains tickets with AI Stage empty or "Needs Plan", do NOT plan them inline — sprint triage is its own bounded job. Instead note the count and mention it in the summary ("N tickets awaiting planning — send `plan`"). The user (or the ops timer's sibling job) runs sprint-triage separately.
 
 ## 5. Telegram summary only if anything happened.
 
