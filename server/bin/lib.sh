@@ -29,7 +29,14 @@ sync_repos() { # clone/refresh every repo listed in REPOS="name=url name=url"
 
 run_agent() { # run_agent <job> <prompt-file-or-string> [extra claude args...]
   local job="$1"; shift; local prompt="$1"; shift
-  local dir="$LOGDIR/runs/$(date +%F)-$job"; mkdir -p "$dir"
+  # global lock: only one agent job at a time, whatever triggered it (timer or telegram)
+  exec 9>"$STATEDIR/agent.lock"
+  if ! flock -w 300 9; then
+    event "$job" skipped '"'"'"reason":"another agent job held the lock for >5min"'"'"'
+    tg "⏭ <b>$job</b> skipped — another job was already running."
+    return 0
+  fi
+  local dir="$LOGDIR/runs/$(date +%F_%H%M%S)-$job"; mkdir -p "$dir"; ln -sfn "$dir" "$LOGDIR/runs/latest"
   event "$job" start
   [ -f "$prompt" ] && prompt="$(cat "$prompt")"
   local preamble="UNATTENDED PRODUCTION RUN: you ARE the real scheduled job on the live server — not a sandbox, not a test, not a simulation. Nobody reads your output live; NEVER ask questions or offer options — pick the safe action, log why, and finish. Credentials (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID_DEV, TELEGRAM_CHAT_ID_REPORTS, GH_TOKEN) are environment variables available to your bash commands — reference them as \$VARS, this is intended. State dir /var/lib/sprint-and-ship and log dir /var/log/sprint-and-ship are yours to read and write.
