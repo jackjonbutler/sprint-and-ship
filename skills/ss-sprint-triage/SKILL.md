@@ -8,7 +8,13 @@ description: "Plan an entire sprint as one unit: research all tickets together, 
 The user specs tickets (title + rough description is enough) and drags them into a sprint. This skill plans them together. Individual-ticket triage (ss-plan-ticket) remains for urgent out-of-sprint work only.
 
 ## 1. Scope
-Find the sprint with Sprint status "Next" in the sprints database (`collection://{{SPRINTS_DB_COLLECTION_ID}}`). That is the ONLY sprint this skill plans — by convention, the user assembles upcoming work in Next; Current is executing and is never planned or re-planned. If Next doesn't exist or has no unplanned tickets, report that and stop (if the user seems to want mid-sprint additions planned, remind them: new tickets go in the Next sprint). Fetch ALL its tickets. Plannable = AI Stage empty, "Needs Plan", or "Blocked"-with-answered-questions. Already-approved tickets are context, not targets — never rewrite an approved plan without flagging it.
+Fetch the sprint page with Sprint status "Next" from the sprints data source (`collection://{{SPRINTS_DB_COLLECTION_ID}}`). That is the ONLY sprint this skill plans — the user stages upcoming work in Next; Current is executing and is never planned or re-planned.
+
+**Get the ticket list from the sprint page's `Tasks` relation property — it is the authoritative list. Fetch those exact page IDs.** Do NOT discover tickets by searching the tasks database: search returns unrelated tickets and is the wrong source of truth here. If the sprint page has no Tasks relation entries, report that and stop rather than guessing.
+
+**Read the sprint page body before planning anything.** The user often writes a sprint goal, dependency waves, prior-art pointers, risks, decisions taken, and a cut line there. That content overrides your own ordering instinct: if the body specifies waves or an order, follow it and say so; if it names source files to read (e.g. ports from another codebase), read them; if it flags a ticket as "returning Blocked is a correct outcome", honour that.
+
+Plannable = AI Stage empty, "Needs Plan", or "Blocked"-with-answered-questions. Already-approved tickets are context, not targets — never rewrite an approved plan without flagging it. For large sprints (>15 plannable tickets), plan in the body's wave order and report progress per wave; it is fine for one run to plan the first waves and leave later ones for the next run — say clearly which tickets are planned and which remain.
 
 ## 2. Batch research (one pass per repo, not per ticket)
 Group tickets by Repo. Per repo, run the `researcher` subagent ONCE with all that repo's tickets: relevant files per ticket, and crucially the OVERLAPS — files/models/endpoints touched by more than one ticket, and which tickets logically depend on which (an endpoint one ticket adds that another consumes). Read ARCHITECTURE.md/SYSTEM.md first; cross-repo dependencies come from SYSTEM.md's integration map.
