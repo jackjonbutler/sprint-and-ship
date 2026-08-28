@@ -7,25 +7,28 @@ This is a real production system (originally built for a three-repo product: mob
 ## The loop
 
 ```
-You file a ticket in Notion (AI Stage: Needs Plan)
-        ↓  nightly scheduled agent (7pm)
-Researches your actual codebases → writes an Implementation Plan
-(with a declared success metric) into the ticket → Plan Ready
-        ↓  you, over coffee (5 min)
-Review plans → approve (Plan Approved) → drag into sprint
-        ↓  one Claude Code window, workspace-level
-/sprint-plan → manifest on the sprint page
-/clear → /next → one ticket per fresh context (GSD-style):
-branch → build → qa-verifier → code-reviewer → PR
-        ↓  you
-Review PR → /ship → merges to development
+You spec tickets loosely and drag them into a sprint
+        ↓  sprint triage (server, nightly — or on demand)
+Researches ALL the sprint's tickets together → orders by dependency
+→ plans each ticket WITH its siblings' plans as context → no clashing plans
+→ manifest + shared-surfaces map on the sprint page
+        ↓  you, over coffee (once per sprint)
+Review the batch of interlocking plans → approve → done till morning review
+        ↓  overnight build loop (server, 1am)
+One ticket per fresh context, in manifest order:
+branch → build → qa-verifier → code-reviewer → PR → cycle review
+Questions? → Telegram (reply "TKT-123: answer") → parks it, builds the next
+        ↓  you, next morning
+Telegram: "3 PRs ready, 1 question" → review → merge to development
 development → main promotion = deliberate release
         ↓  nightly agent
-Detects actual production releases (instant-deploy hosts, server SHA checks, App/Play Store polling)
-        ↓  weekly scheduled agent (Sunday 7pm)
-Ship & Learn: checks each change's success metric FROM ITS LIVE DATE
-(PostHog · Search Console · RevenueCat) → Changelog verdicts →
-weekly report → build-in-public content drafts into a tracked pipeline
+Detects actual production releases (instant hosts, server SHA, store polling)
+        ↓  weekly agent (Sunday)
+Ship & Learn: success metrics measured FROM LIVE DATE → Changelog verdicts
+→ report → build-in-public content drafts
+        ↓  sprint close
+Cycle reviews synthesized → recurring friction becomes pipeline tickets
+→ the system improves itself through its own gates
 ```
 
 Three human decisions per ticket: what to build · approve the plan · approve the PR. Everything else is pipeline.
