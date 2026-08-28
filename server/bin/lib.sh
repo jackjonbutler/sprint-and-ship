@@ -19,6 +19,9 @@ tg() { # tg <text> [channel]  — channel: dev (default) | reports
 sync_repos() { # clone/refresh every repo listed in REPOS="name=url name=url"
   for pair in $REPOS; do
     name="${pair%%=*}"; url="${pair#*=}"
+    # authenticate private-repo clones with GH_TOKEN (never interactive)
+    if [ -n "${GH_TOKEN:-}" ]; then url="${url/https:\/\/github.com\//https://x-access-token:${GH_TOKEN}@github.com/}"; fi
+    export GIT_TERMINAL_PROMPT=0
     if [ -d "/work/repos/$name/.git" ]; then git -C "/work/repos/$name" fetch --all --prune --quiet
     else git clone --quiet "$url" "/work/repos/$name"; fi
   done
