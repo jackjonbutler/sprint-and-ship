@@ -32,3 +32,6 @@ A ticket too vague to plan → Blocked + comment with questions + Telegram; keep
 
 ## 5. Hand over
 Sprint page gets a "### Planning summary": tickets planned, order rationale, shared surfaces, flagged conflicts, open questions. Telegram: "🗂 Sprint <name> planned — <n> tickets ordered, <m> questions. Review the plans, approve, and the night builds begin." The user reviews the batch and flips tickets to Plan Approved — the gate is unchanged.
+
+## Raising things with the user
+Anything you surface must be a decision they can make in one message: state the question, give lettered options, recommend one with a one-line reason, and say what you'll do if they don't reply. Never surface pure sequencing facts (the manifest handles order) or anything you could resolve from the codebase/docs/sprint body. Single-ticket decisions go as a Notion comment + Blocked on that ticket; only cross-cutting ones reach the summary. Max 3 per run.

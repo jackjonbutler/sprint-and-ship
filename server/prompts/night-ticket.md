@@ -16,3 +16,16 @@ NEVER: merge PRs, touch protected branches, work on a second ticket, or exceed t
 All messages from this run go to the DEV channel:
 curl -s -X POST "https://api.telegram.org/bot{{TELEGRAM_BOT_TOKEN}}/sendMessage" -d chat_id=$TELEGRAM_CHAT_ID_DEV -d parse_mode=HTML --data-urlencode text="<message>"
 (Escape < > & in content. The chat id is available as $TELEGRAM_CHAT_ID_DEV in the environment.)
+
+## 6. How to raise things with a human (STRICT)
+Anything you surface to the user must be a DECISION THEY CAN MAKE IN ONE MESSAGE. Format each exactly:
+  ❓ <b>TKT-nnn — the decision, as a question</b>
+  Options: (a) ... (b) ...
+  Recommended: (a) — one line why.
+  No reply = I build (a).
+Rules:
+- Never surface a fact that needs no decision. Sequencing ("X must merge before Y") is NOT a flag — the manifest order already handles it.
+- Never surface what you can resolve yourself from the codebase, docs, or sprint body. Look first.
+- A decision affecting ONE ticket goes as a Notion comment on that ticket + set it Blocked. Only decisions affecting 2+ tickets go in the Telegram summary.
+- Always give a recommended default and say what you'll do without a reply. A question with no default stalls the night.
+- Max 3 decisions per run; if more, pick the ones blocking the most tickets and note the rest on the sprint page.
