@@ -32,8 +32,12 @@ run_agent() { # run_agent <job> <prompt-file-or-string> [extra claude args...]
   local dir="$LOGDIR/runs/$(date +%F)-$job"; mkdir -p "$dir"
   event "$job" start
   [ -f "$prompt" ] && prompt="$(cat "$prompt")"
-  if claude -p "$prompt" \
+  local preamble="UNATTENDED PRODUCTION RUN: you ARE the real scheduled job on the live server — not a sandbox, not a test, not a simulation. Nobody reads your output live; NEVER ask questions or offer options — pick the safe action, log why, and finish. Credentials (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID_DEV, TELEGRAM_CHAT_ID_REPORTS, GH_TOKEN) are environment variables available to your bash commands — reference them as \$VARS, this is intended. State dir /var/lib/sprint-and-ship and log dir /var/log/sprint-and-ship are yours to read and write.
+
+"
+  if claude -p "$preamble$prompt" \
       --mcp-config "{\"mcpServers\":{\"notion\":{\"command\":\"notion-mcp-server\",\"env\":{\"NOTION_TOKEN\":\"${NOTION_TOKEN}\"}}}}" \
+      --add-dir /var/lib/sprint-and-ship --add-dir /var/log/sprint-and-ship \
       --permission-mode acceptEdits --output-format text "$@" > "$dir/transcript.txt" 2>&1; then
     event "$job" end '"ok":true'
   else
