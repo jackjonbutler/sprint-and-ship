@@ -25,6 +25,16 @@ for row in $(gh_api "$API/pulls?state=closed&per_page=30" | jq -r '.[] | select(
   # only if the head branch still exists and no open PR already uses it
   gh_api "$API/branches/$H" | jq -e .name >/dev/null 2>&1 || continue
   gh_api "$API/pulls?state=open&head=${REPO%%/*}:$H" | jq -e '.[0]' >/dev/null 2>&1 && continue
+  # SKIP if this work already landed: a squash-merge leaves the branch "diverged" from the
+  # base even though its content is in — compare patch-ids, not commit ancestry.
+  CMP=$(gh_api "$API/compare/$BASE...$H")
+  UNIQUE=$(echo "$CMP" | jq -r '[.files[]?.filename] | length')
+  AHEAD=$(echo "$CMP" | jq -r '.ahead_by')
+  if [ "$AHEAD" = "0" ] || [ "$UNIQUE" = "0" ]; then
+    gh_api -X DELETE "$API/git/refs/heads/$H" > /dev/null
+    event merge-train rescue-skipped "\"closed_pr\":$N,\"reason\":\"content already in $BASE; stale branch deleted\""
+    continue
+  fi
   NEW=$(gh_api -X POST "$API/pulls" -d "{\"title\":\"$T\",\"head\":\"$H\",\"base\":\"$BASE\",\"body\":\"Recreated by the merge train: PR #$N was auto-closed when its stacked base branch was deleted. Same branch and commits, now based on $BASE.\"}" | jq -r '.number // empty')
   [ -n "$NEW" ] && event merge-train rescued "\"closed_pr\":$N,\"new_pr\":$NEW"
 done
@@ -76,6 +86,14 @@ while :; do
   if echo "$RESP" | jq -e .merged >/dev/null 2>&1 && [ "$(echo "$RESP" | jq -r .merged)" = "true" ]; then
     gh_api -X DELETE "$API/git/refs/heads/$HEAD" > /dev/null
     event merge-train merged "\"pr\":$NUM,\"title\":\"$TITLE\""
+    MERGE_SHA=$(echo "$RESP" | jq -r .sha)
+    # Notion must learn the ticket shipped, or the night build will rebuild it.
+    TICKET=$(echo "$TITLE" | grep -oE "^TT-[0-9]+")
+    if [ -n "$TICKET" ] && [ -n "${NOTION_TOKEN:-}" ]; then
+      MERGE_SHA="$MERGE_SHA" TICKET="$TICKET" PRNUM="$NUM" run_agent "notion-close-$TICKET" \
+        "Ticket $TICKET was just merged into $BASE as $MERGE_SHA (PR #$PRNUM). In Notion Tasks - Tech: set that ticket's Status to \"Done\" and clear its AI Stage, and add a comment recording the merge SHA, the PR number, and that it ships with the next $BASE to production release. Change nothing else. If the comment API errors, still make the property changes and report the failure. This is bookkeeping only — do not touch code." \
+        > /dev/null 2>&1 || event merge-train notion-update-failed "\"pr\":$NUM,\"ticket\":\"$TICKET\""
+    fi
     merged=$((merged+1))
   else
     event merge-train failed "\"pr\":$NUM,\"resp\":$(echo "$RESP" | jq -c .message)"
