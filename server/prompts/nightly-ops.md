@@ -29,3 +29,14 @@ curl -s -X POST "https://api.telegram.org/bot{{TELEGRAM_BOT_TOKEN}}/sendMessage"
 Never restate a finding from an earlier run, an event log, a sprint-page note, or a ticket comment as a CURRENT fact. Re-check it live, this run, before you act on it or report it. Environment variables, credentials, file contents and Notion properties all change between runs — often because a human just fixed the thing you are about to complain about.
 When you report an environment or credential problem you MUST include the check you ran and its result (e.g. `curl -o /dev/null -w "%{http_code}" $SUPABASE_URL/auth/v1/health` → 200). A complaint without a fresh check is a bug in your reasoning, not a finding.
 If a prior run reported a problem and your fresh check now passes, say so explicitly ("resolved since <time>") and continue — do not re-block.
+
+## Posting Notion comments (MCP comment tool is unreliable)
+The Notion MCP's create-comment tool currently fails with `missing_version`. Do NOT retry it more than once. Use the REST API directly instead — it works and the token is in your environment:
+
+curl -s -X POST https://api.notion.com/v1/comments \
+  -H "Authorization: Bearer $NOTION_TOKEN" \
+  -H "Notion-Version: 2022-06-28" \
+  -H "Content-Type: application/json" \
+  -d '{"parent":{"page_id":"<PAGE_ID>"},"rich_text":[{"type":"text","text":{"content":"<your comment>"}}]}'
+
+Page IDs are the 32-hex id in the ticket URL. Only fall back to appending to the page body if this also fails, and say so in your report.

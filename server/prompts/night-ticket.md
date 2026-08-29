@@ -46,3 +46,14 @@ The repo root may contain `SPRINT-NOTES.md` — short, dated, cross-ticket facts
 - Do NOT append: ticket-specific detail (that belongs in your plan), a summary of what you built (the manifest and Changelog cover that), or process complaints (those go to the Improvement Log via the cycle review).
 - If what you learned is a durable architectural fact, put it in ARCHITECTURE.md instead and skip the note.
 - If the file does not exist and you have something worth recording, create it with the same rules at the top.
+
+## Posting Notion comments (MCP comment tool is unreliable)
+The Notion MCP's create-comment tool currently fails with `missing_version`. Do NOT retry it more than once. Use the REST API directly instead — it works and the token is in your environment:
+
+curl -s -X POST https://api.notion.com/v1/comments \
+  -H "Authorization: Bearer $NOTION_TOKEN" \
+  -H "Notion-Version: 2022-06-28" \
+  -H "Content-Type: application/json" \
+  -d '{"parent":{"page_id":"<PAGE_ID>"},"rich_text":[{"type":"text","text":{"content":"<your comment>"}}]}'
+
+Page IDs are the 32-hex id in the ticket URL. Only fall back to appending to the page body if this also fails, and say so in your report.

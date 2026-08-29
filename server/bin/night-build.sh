@@ -12,7 +12,7 @@ for i in $(seq 1 "${MAX_TICKETS_PER_NIGHT:-6}"); do
   # Each iteration is a FRESH context executing exactly one ticket (the ss-next procedure).
   if run_agent "night-build-$i" /work/prompts/night-ticket.md; then
     # agent exits with a final line we parse from transcript: NEXT | EMPTY | ASKED | FAILED
-    last=$(tail -5 "$LOGDIR/runs/$(date +%F)-night-build-$i/transcript.txt" | grep -oE 'RESULT:(NEXT|EMPTY|ASKED|FAILED)' | tail -1 || true)
+    last=$(grep -ohE 'RESULT:(NEXT|EMPTY|ASKED|FAILED)' "$LOGDIR/runs/latest/transcript.txt" 2>/dev/null | tail -1 || true)
     case "$last" in
       RESULT:EMPTY) break ;;
       RESULT:ASKED) ASKED=$((ASKED+1)) ;;
