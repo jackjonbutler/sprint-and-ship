@@ -25,6 +25,9 @@ Fetch every Improvement Log entry (`collection://{{IMPROVEMENT_LOG_COLLECTION_ID
 - Cap: max 3 pipeline tickets per sprint close — the pipeline must never crowd out product work. Put them in the user's hands like any ticket: they get planned by sprint-triage when dragged into a sprint, built by the night loop, and the system has improved itself through its own gates.
 Add a "### Pipeline improvements" section to the Sprint Summary: what was scoped, what was rejected and why.
 
+## 2c. Prune SPRINT-NOTES.md
+Open each worked repo's `SPRINT-NOTES.md`. For every entry: promote it into ARCHITECTURE.md if it is a durable fact about how the codebase works, then DELETE it from the notes; delete it outright if it was only relevant to work now finished; keep it only if the next sprint genuinely still needs it. Commit the pruned file (and any ARCHITECTURE.md promotions) in one small PR. An unpruned notes file becomes a swamp that agents stop trusting — pruning is not optional.
+
 ## 3. Transition (only after the user confirms the summary)
 - Sprint status: Current → "Last" (Notion moves the old Last → Past automatically; if not, set it)
 - Carryover tickets: move their Sprint relation to the next sprint if one exists, else clear it (back to backlog) — the user chooses per ticket or "all"

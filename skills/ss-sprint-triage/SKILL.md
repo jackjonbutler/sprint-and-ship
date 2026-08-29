@@ -35,3 +35,11 @@ Sprint page gets a "### Planning summary": tickets planned, order rationale, sha
 
 ## Raising things with the user
 Anything you surface must be a decision they can make in one message: state the question, give lettered options, recommend one with a one-line reason, and say what you'll do if they don't reply. Never surface pure sequencing facts (the manifest handles order) or anything you could resolve from the codebase/docs/sprint body. Single-ticket decisions go as a Notion comment + Blocked on that ticket; only cross-cutting ones reach the summary. Max 3 per run.
+
+## Sprint notes (working memory between tickets)
+The repo root may contain `SPRINT-NOTES.md` — short, dated, cross-ticket facts left by earlier tickets in this sprint.
+- **Read it immediately after ARCHITECTURE.md**, before designing your approach. It is deliberately small; reading it costs almost nothing and saves rediscovering things the hard way.
+- **Append to it before you open your PR** IF this ticket learned something a *later ticket* would otherwise trip over: a surprise, a non-obvious command, a convention you had to settle, a path that moved. One or two lines, newest at top, prefixed with your ticket key. Include it in the same commit as your code.
+- Do NOT append: ticket-specific detail (that belongs in your plan), a summary of what you built (the manifest and Changelog cover that), or process complaints (those go to the Improvement Log via the cycle review).
+- If what you learned is a durable architectural fact, put it in ARCHITECTURE.md instead and skip the note.
+- If the file does not exist and you have something worth recording, create it with the same rules at the top.

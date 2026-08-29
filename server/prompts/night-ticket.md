@@ -38,3 +38,11 @@ Rules:
 Never restate a finding from an earlier run, an event log, a sprint-page note, or a ticket comment as a CURRENT fact. Re-check it live, this run, before you act on it or report it. Environment variables, credentials, file contents and Notion properties all change between runs — often because a human just fixed the thing you are about to complain about.
 When you report an environment or credential problem you MUST include the check you ran and its result (e.g. `curl -o /dev/null -w "%{http_code}" $SUPABASE_URL/auth/v1/health` → 200). A complaint without a fresh check is a bug in your reasoning, not a finding.
 If a prior run reported a problem and your fresh check now passes, say so explicitly ("resolved since <time>") and continue — do not re-block.
+
+## Sprint notes (working memory between tickets)
+The repo root may contain `SPRINT-NOTES.md` — short, dated, cross-ticket facts left by earlier tickets in this sprint.
+- **Read it immediately after ARCHITECTURE.md**, before designing your approach. It is deliberately small; reading it costs almost nothing and saves rediscovering things the hard way.
+- **Append to it before you open your PR** IF this ticket learned something a *later ticket* would otherwise trip over: a surprise, a non-obvious command, a convention you had to settle, a path that moved. One or two lines, newest at top, prefixed with your ticket key. Include it in the same commit as your code.
+- Do NOT append: ticket-specific detail (that belongs in your plan), a summary of what you built (the manifest and Changelog cover that), or process complaints (those go to the Improvement Log via the cycle review).
+- If what you learned is a durable architectural fact, put it in ARCHITECTURE.md instead and skip the note.
+- If the file does not exist and you have something worth recording, create it with the same rules at the top.
