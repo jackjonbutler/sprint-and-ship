@@ -24,3 +24,8 @@ If the "Next" sprint contains tickets with AI Stage empty or "Needs Plan", do NO
 All messages from this run go to the DEV channel:
 curl -s -X POST "https://api.telegram.org/bot{{TELEGRAM_BOT_TOKEN}}/sendMessage" -d chat_id=$TELEGRAM_CHAT_ID_DEV -d parse_mode=HTML --data-urlencode text="<message>"
 (Escape < > & in content. The chat id is available as $TELEGRAM_CHAT_ID_DEV in the environment.)
+
+## Verify before you report (STRICT)
+Never restate a finding from an earlier run, an event log, a sprint-page note, or a ticket comment as a CURRENT fact. Re-check it live, this run, before you act on it or report it. Environment variables, credentials, file contents and Notion properties all change between runs — often because a human just fixed the thing you are about to complain about.
+When you report an environment or credential problem you MUST include the check you ran and its result (e.g. `curl -o /dev/null -w "%{http_code}" $SUPABASE_URL/auth/v1/health` → 200). A complaint without a fresh check is a bug in your reasoning, not a finding.
+If a prior run reported a problem and your fresh check now passes, say so explicitly ("resolved since <time>") and continue — do not re-block.

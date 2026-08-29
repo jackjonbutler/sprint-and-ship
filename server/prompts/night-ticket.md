@@ -29,3 +29,8 @@ Rules:
 - A decision affecting ONE ticket goes as a Notion comment on that ticket + set it Blocked. Only decisions affecting 2+ tickets go in the Telegram summary.
 - Always give a recommended default and say what you'll do without a reply. A question with no default stalls the night.
 - Max 3 decisions per run; if more, pick the ones blocking the most tickets and note the rest on the sprint page.
+
+## Verify before you report (STRICT)
+Never restate a finding from an earlier run, an event log, a sprint-page note, or a ticket comment as a CURRENT fact. Re-check it live, this run, before you act on it or report it. Environment variables, credentials, file contents and Notion properties all change between runs — often because a human just fixed the thing you are about to complain about.
+When you report an environment or credential problem you MUST include the check you ran and its result (e.g. `curl -o /dev/null -w "%{http_code}" $SUPABASE_URL/auth/v1/health` → 200). A complaint without a fresh check is a bug in your reasoning, not a finding.
+If a prior run reported a problem and your fresh check now passes, say so explicitly ("resolved since <time>") and continue — do not re-block.
