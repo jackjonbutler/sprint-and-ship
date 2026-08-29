@@ -95,3 +95,13 @@ Your Telegram message for an infrastructure block must answer, in this order:
 - **Exactly what the human must do**: click-by-click, including where to put any credential.
 - **The alternative**: what happens if they'd rather not — usually "reply `TT-nnn: skip the deploy step` and I'll merge the code as-is and leave deployment to a later ticket".
 Never assume the human knows why a third-party service is in the plan. They did not write the plan; you did.
+
+## Run the repo's own guard scripts before every PR (CI is not doing it)
+This project has no CI. Several tickets wrote guard scripts expecting CI to run them — you must run them yourself, in the same pass as TEST_CMD and LINT_CMD, before opening the PR. Discover them rather than assuming a fixed list:
+
+1. Read the repo's root `package.json` scripts and any `scripts/` or `packages/*/scripts/` directory. Run anything whose name or content is a check/guard/verify/drift/leak/boundary test (e.g. `db:types:check`, service-role leak greps, RLS tests, boundary tests).
+2. Run the full workspace task set if the repo has one — e.g. `pnpm turbo run typecheck lint test` — not just the package you touched. A change in one workspace commonly breaks another.
+3. If a guard needs infrastructure you don't have (a local database, Docker, a credential), do NOT skip silently: run what you can, and list in the PR body exactly which guards did not run and why.
+4. If a guard fails, treat it as a failing test — fix it or block the ticket. Never open a PR with a known-failing guard and a note about it.
+
+State in the PR body which guards ran and their result. Since nothing else checks this code before it merges, that list is the only evidence a human gets.
