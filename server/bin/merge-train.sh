@@ -9,6 +9,26 @@ BASE="${2:?}"
 API="https://api.github.com/repos/$REPO"
 gh_api() { curl -s -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "$@"; }
 
+# PASS 0 — retarget every stacked PR onto the real base BEFORE merging anything.
+# GitHub permanently closes a PR whose base branch is deleted, and a closed PR
+# cannot be reopened or retargeted — so stacking must be unwound first.
+for n in $(gh_api "$API/pulls?state=open&per_page=50" | jq -r --arg b "$BASE" '.[] | select(.base.ref != $b) | select(.title|test("^TT-[0-9]+")) | .number'); do
+  gh_api -X PATCH "$API/pulls/$n" -d "{\"base\":\"$BASE\"}" > /dev/null
+  event merge-train retargeted "\"pr\":$n,\"to\":\"$BASE\",\"pass\":0"
+  sleep 2
+done
+
+# PASS 0b — rescue any PR already orphaned by a deleted base (reopen is impossible; open a fresh one)
+for row in $(gh_api "$API/pulls?state=closed&per_page=30" | jq -r '.[] | select(.merged_at==null) | select(.title|test("^TT-[0-9]+")) | [.number,.head.ref,.title] | @base64'); do
+  d() { echo "$row" | base64 -d | jq -r ".[$1]"; }
+  N=$(d 0); H=$(d 1); T=$(d 2)
+  # only if the head branch still exists and no open PR already uses it
+  gh_api "$API/branches/$H" | jq -e .name >/dev/null 2>&1 || continue
+  gh_api "$API/pulls?state=open&head=${REPO%%/*}:$H" | jq -e '.[0]' >/dev/null 2>&1 && continue
+  NEW=$(gh_api -X POST "$API/pulls" -d "{\"title\":\"$T\",\"head\":\"$H\",\"base\":\"$BASE\",\"body\":\"Recreated by the merge train: PR #$N was auto-closed when its stacked base branch was deleted. Same branch and commits, now based on $BASE.\"}" | jq -r '.number // empty')
+  [ -n "$NEW" ] && event merge-train rescued "\"closed_pr\":$N,\"new_pr\":$NEW"
+done
+
 merged=0; parked=0
 while :; do
   # oldest open PR whose title starts with a ticket key
