@@ -33,6 +33,7 @@ while true; do
     [ -z "$MSG" ] && continue
     [ "$FROM" != "$OWNER" ] && continue   # only the owner commands the system
     CMD=$(echo "$MSG" | tr '[:upper:]' '[:lower:]' | xargs)
+    # normalise: any message starting with a ticket key is an answer
     case "$CMD" in
       plan|"run plan"|triage)  run_locked "$CHAT" "Sprint planning" bin/run-job.sh sprint-triage & ;;
       build|"run build")       run_locked "$CHAT" "Night build" bin/night-build.sh & ;;
@@ -41,9 +42,9 @@ while true; do
         reply "$CHAT" "📟 last events: ${LAST:-none yet}" ;;
       help)
         reply "$CHAT" "Commands: <b>plan</b> (sprint planning now) · <b>build</b> (build loop now) · <b>status</b> · or answer questions as TKT-123: your answer" ;;
-      tkt-*|TKT-*)
+      tt-*|TT-*|tkt-*|TKT-*)
         echo "$upd" | jq -c '{ts: now | todate, from: .message.from.id, text: .message.text}' >> "$INBOX"
-        reply "$CHAT" "📥 noted — will be applied to the ticket on the next ops run (or send: plan)" ;;
+        reply "$CHAT" "📥 noted — applied to the ticket on the next ops run (or send: plan)" ;;
     esac
   done
 done
