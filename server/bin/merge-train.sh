@@ -82,6 +82,7 @@ while :; do
     fi
   fi
 
+  "$(dirname "${BASH_SOURCE[0]}")/stage.sh" "$(echo "$TITLE" | grep -oE "^TT-[0-9]+")" "merging PR #$NUM" 2>/dev/null || true
   # 3. squash merge
   RESP=$(gh_api -X PUT "$API/pulls/$NUM/merge" -d "{\"merge_method\":\"squash\",\"commit_title\":\"$TITLE (#$NUM)\"}")
   if echo "$RESP" | jq -e .merged >/dev/null 2>&1 && [ "$(echo "$RESP" | jq -r .merged)" = "true" ]; then

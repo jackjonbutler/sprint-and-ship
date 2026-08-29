@@ -57,3 +57,19 @@ curl -s -X POST https://api.notion.com/v1/comments \
   -d '{"parent":{"page_id":"<PAGE_ID>"},"rich_text":[{"type":"text","text":{"content":"<your comment>"}}]}'
 
 Page IDs are the 32-hex id in the ticket URL. Only fall back to appending to the page body if this also fails, and say so in your report.
+
+## Report your stage as you go (REQUIRED)
+Humans watch a dashboard fed by these calls. After entering each phase below, immediately run the matching command in bash — before doing the work of that phase, not after:
+
+  bash /work/bin/stage.sh TT-<id> "reading plan"
+  bash /work/bin/stage.sh TT-<id> "branching"
+  bash /work/bin/stage.sh TT-<id> "building"
+  bash /work/bin/stage.sh TT-<id> "running tests"
+  bash /work/bin/stage.sh TT-<id> "qa verify"
+  bash /work/bin/stage.sh TT-<id> "code review"
+  bash /work/bin/stage.sh TT-<id> "fixing review findings"     # only if the reviewer flagged something
+  bash /work/bin/stage.sh TT-<id> "raising PR"
+  bash /work/bin/stage.sh TT-<id> "cycle review"
+  bash /work/bin/stage.sh TT-<id> "done — PR #<n>"             # final, always
+
+If you stop early, report why as the stage: "blocked — <one-line reason>", "waiting on TT-nnn", or "failed — <reason>". A ticket that goes quiet with no terminal stage looks stuck to whoever is watching. These calls are cheap; never skip them to save time.
