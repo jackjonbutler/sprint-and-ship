@@ -16,7 +16,12 @@ for i in $(seq 1 "${MAX_TICKETS_PER_NIGHT:-6}"); do
     case "$last" in
       RESULT:EMPTY) break ;;
       RESULT:ASKED) ASKED=$((ASKED+1)) ;;
-      RESULT:NEXT)  BUILT=$((BUILT+1)); FAILS=0 ;;
+      RESULT:NEXT)
+        BUILT=$((BUILT+1)); FAILS=0
+        # Land it NOW so the next ticket branches off a development that contains it.
+        # Dependency-ordered manifests need this: otherwise ticket N+1 skips as "waiting".
+        [ -n "${MERGE_TRAIN_REPO:-}" ] && bin/merge-train.sh "$MERGE_TRAIN_REPO" "${MERGE_TRAIN_BASE:-development}" || true
+        ;;
       *)            FAILS=$((FAILS+1)) ;;
     esac
   else
