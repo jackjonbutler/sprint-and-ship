@@ -2,10 +2,15 @@
 Description=sprint-and-ship telegram command listener
 After=docker.service
 Requires=docker.service
+
 [Service]
 WorkingDirectory=/opt/sprint-and-ship/server
-ExecStart=/usr/bin/docker compose run --rm agent bin/tg-commands.sh
+# a fixed name + pre/post cleanup guarantees exactly ONE listener ever polls Telegram
+ExecStartPre=-/usr/bin/docker rm -f sas-listener
+ExecStart=/usr/bin/docker compose run --rm --name sas-listener agent bin/tg-commands.sh
+ExecStop=-/usr/bin/docker rm -f sas-listener
 Restart=always
 RestartSec=10
+
 [Install]
 WantedBy=multi-user.target
