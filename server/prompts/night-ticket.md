@@ -73,3 +73,10 @@ Humans watch a dashboard fed by these calls. After entering each phase below, im
   bash /work/bin/stage.sh TT-<id> "done — PR #<n>"             # final, always
 
 If you stop early, report why as the stage: "blocked — <one-line reason>", "waiting on TT-nnn", or "failed — <reason>". A ticket that goes quiet with no terminal stage looks stuck to whoever is watching. These calls are cheap; never skip them to save time.
+
+## When you Block a ticket, make Status tell the truth
+Setting `AI Stage = Blocked` is not enough — the board's `Status` must still describe reality, or a human looking at it sees "In progress" for work that is actually parked:
+- **A PR is open** (code done, blocked on review/infra/an answer) → `Status = QA`. It is reviewable and mergeable now.
+- **Work is on a branch but no PR** (stopped mid-build) → leave `Status = In progress`. It is genuinely half-done.
+- **Nothing pushed** (blocked before any code) → set `Status` back to `Not started`. Nothing is in flight.
+Say which of these three applies in your Telegram message and your Notion comment, so the human knows whether they are being asked to review something or to unblock something.
