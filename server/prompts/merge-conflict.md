@@ -15,6 +15,20 @@ You are resolving a merge conflict so a ticket's PR can land. Repos are cloned a
 6. `git push --force-with-lease` (never plain `--force`).
 7. Comment on the PR summarising exactly which files conflicted and how each was resolved.
 
+
+## The squashed-dependency case (common — solve it, do not stop)
+Symptom: the branch was cut from another ticket's branch, that ticket was then **squash-merged** into the base, and now a plain `git rebase` replays commits whose content is already in the base — producing add/add, rename/delete or "already applied" conflicts on files you never touched.
+
+Recognise it by: `git log --oneline origin/<BASE>..<branch>` showing commits belonging to *other* tickets (a different TT- number) that are already in the base as one squash commit.
+
+Recipe:
+1. Find the last commit on the branch that belongs to another ticket — call it `$LAST_FOREIGN`.
+2. `git rebase --onto origin/<BASE> $LAST_FOREIGN <branch>` — replays ONLY this ticket's own commits onto the base, dropping the duplicated ones.
+3. If that still conflicts, the branch genuinely depends on work that has not landed yet: STOP, and report which ticket must merge first. Do not invent the missing work.
+4. Push with an explicit lease so it cannot clobber: `git push --force-with-lease=<branch>:<sha-you-fetched> <remote> HEAD:<branch>`. A bare `--force-with-lease` fails with "stale info" when pushing a differently-named local branch.
+
+This is history surgery, but it is *mechanical* history surgery — no design decision is involved, so it does not qualify for the STOP rules. Only stop if step 3 applies, or if the dropped commits contain changes that are NOT in the base (verify with `git diff origin/<BASE> -- <paths>` before assuming).
+
 ## STOP conditions — park, do not guess
 If resolving requires choosing between two genuinely different behaviours, if the base has moved the ground under the branch's whole approach, if tests fail after resolution and the fix isn't obviously part of the conflict, or if the conflict touches auth/payments/money math or a migration already applied to a shared database: abandon the rebase (`git rebase --abort`), leave the branch untouched, set the ticket's AI Stage to "Blocked", comment on both the PR and the ticket with the specific decision needed, and Telegram the DEV channel. A half-resolved conflict is worse than a parked one.
 

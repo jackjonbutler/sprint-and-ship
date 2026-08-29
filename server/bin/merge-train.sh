@@ -29,11 +29,11 @@ for row in $(gh_api "$API/pulls?state=closed&per_page=30" | jq -r '.[] | select(
   [ -n "$NEW" ] && event merge-train rescued "\"closed_pr\":$N,\"new_pr\":$NEW"
 done
 
-merged=0; parked=0
+merged=0; parked=0; SKIPPED="[]"
 while :; do
   # oldest open PR whose title starts with a ticket key
   PR=$(gh_api "$API/pulls?state=open&sort=created&direction=asc&per_page=20" \
-    | jq -r '[.[] | select(.draft==false) | select(.title|test("^TT-[0-9]+"))] | .[0] // empty')
+    | jq -r --argjson skip "$SKIPPED" '[.[] | select(.draft==false) | select(.title|test("^TT-[0-9]+")) | select(.number as $n | $skip | index($n) | not)] | .[0] // empty')
   [ -z "$PR" ] && break
   NUM=$(echo "$PR" | jq -r .number); TITLE=$(echo "$PR" | jq -r .title)
   HEAD=$(echo "$PR" | jq -r .head.ref); CURBASE=$(echo "$PR" | jq -r .base.ref)
@@ -55,7 +55,7 @@ while :; do
   if [ "$CHECKS" != "0" ] || [ "$REVIEWS" != "0" ]; then
     event merge-train parked "\"pr\":$NUM,\"reason\":\"failing checks ($CHECKS) or changes requested ($REVIEWS)\""
     tg "⏸ <b>PR #$NUM</b> $TITLE — not merged: failing checks or changes requested."
-    parked=$((parked+1)); break
+    parked=$((parked+1)); SKIPPED=$(echo "$SKIPPED" | jq -c ". + [$NUM]"); continue
   fi
 
   if [ "$MERGEABLE" = "false" ]; then
@@ -66,8 +66,8 @@ while :; do
       sleep 5; MERGEABLE=$(gh_api "$API/pulls/$NUM" | jq -r .mergeable)
     fi
     if [ "$MERGEABLE" != "true" ]; then
-      tg "🔴 <b>PR #$NUM</b> still conflicted after automated rebase — needs a human."
-      parked=$((parked+1)); break
+      tg "🔴 <b>PR #$NUM</b> still conflicted after automated rebase — needs a human. Continuing with the rest of the queue."
+      parked=$((parked+1)); SKIPPED=$(echo "$SKIPPED" | jq -c ". + [$NUM]"); continue
     fi
   fi
 
@@ -80,7 +80,7 @@ while :; do
   else
     event merge-train failed "\"pr\":$NUM,\"resp\":$(echo "$RESP" | jq -c .message)"
     tg "🔴 <b>PR #$NUM</b> merge call failed: $(echo "$RESP" | jq -r .message)"
-    parked=$((parked+1)); break
+    parked=$((parked+1)); SKIPPED=$(echo "$SKIPPED" | jq -c ". + [$NUM]")
   fi
   sleep 4
 done
