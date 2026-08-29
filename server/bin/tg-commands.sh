@@ -37,11 +37,12 @@ while true; do
     case "$CMD" in
       plan|"run plan"|triage)  run_locked "$CHAT" "Sprint planning" bin/run-job.sh sprint-triage & ;;
       build|"run build")       run_locked "$CHAT" "Night build" bin/night-build.sh & ;;
+      merge|"run merge")       run_locked "$CHAT" "Merge train" bin/merge-train.sh "${MERGE_TRAIN_REPO:?}" "${MERGE_TRAIN_BASE:-development}" & ;;
       status)
         LAST=$(tail -3 "$LOGDIR/events.jsonl" 2>/dev/null | jq -r '"\(.ts | split("T")[1] | split("+")[0]) \(.job) \(.type)"' | paste -sd '; ' -)
         reply "$CHAT" "📟 last events: ${LAST:-none yet}" ;;
       help)
-        reply "$CHAT" "Commands: <b>plan</b> (sprint planning now) · <b>build</b> (build loop now) · <b>status</b> · or answer questions as TKT-123: your answer" ;;
+        reply "$CHAT" "Commands: <b>plan</b> · <b>build</b> · <b>merge</b> (land green PRs into development) · <b>status</b> · or answer questions as TKT-123: your answer" ;;
       tt-*|TT-*|tkt-*|TKT-*)
         echo "$upd" | jq -c '{ts: now | todate, from: .message.from.id, text: .message.text}' >> "$INBOX"
         reply "$CHAT" "📥 noted — applied to the ticket on the next ops run (or send: plan)" ;;

@@ -17,6 +17,10 @@ All messages from this run go to the DEV channel:
 curl -s -X POST "https://api.telegram.org/bot{{TELEGRAM_BOT_TOKEN}}/sendMessage" -d chat_id=$TELEGRAM_CHAT_ID_DEV -d parse_mode=HTML --data-urlencode text="<message>"
 (Escape < > & in content. The chat id is available as $TELEGRAM_CHAT_ID_DEV in the environment.)
 
+## Branching rule (absolute)
+ALWAYS cut the ticket branch from `origin/<DEFAULT_BRANCH>` and ALWAYS open the PR against `<DEFAULT_BRANCH>`. NEVER base a branch or a PR on another ticket's branch, even when this ticket depends on that one — stacked PRs create conflict chains that a human then has to unpick.
+If a dependency's work is genuinely not on the default branch yet: check whether its PR is open and green (the merge train lands those automatically, usually within the same run). If it truly hasn't landed and you cannot proceed without it, do NOT stack — mark the manifest line "⚠ waiting on TT-nnn", leave this ticket untouched at Plan Approved, print RESULT:NEXT and move to the next ticket. The dependency will land and this one builds cleanly on the following pass.
+
 ## 6. How to raise things with a human (STRICT)
 Anything you surface to the user must be a DECISION THEY CAN MAKE IN ONE MESSAGE. Format each exactly:
   ❓ <b>TKT-nnn — the decision, as a question</b>
