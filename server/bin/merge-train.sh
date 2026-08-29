@@ -72,6 +72,7 @@ while :; do
     # conflict: hand to an agent to rebase-resolve in a dedicated run
     event merge-train conflict "\"pr\":$NUM"
     tg "🧩 <b>PR #$NUM</b> $TITLE — merge conflict against $BASE. Running conflict resolution..."
+    status_note "🧩 conflict on PR #$NUM ($TITLE) — resolving"
     if run_agent "merge-conflict-$NUM" "/work/prompts/merge-conflict.md" 2>/dev/null; then
       sleep 5; MERGEABLE=$(gh_api "$API/pulls/$NUM" | jq -r .mergeable)
     fi
@@ -86,6 +87,7 @@ while :; do
   if echo "$RESP" | jq -e .merged >/dev/null 2>&1 && [ "$(echo "$RESP" | jq -r .merged)" = "true" ]; then
     gh_api -X DELETE "$API/git/refs/heads/$HEAD" > /dev/null
     event merge-train merged "\"pr\":$NUM,\"title\":\"$TITLE\""
+    status_note "🚂 merged PR #$NUM — $TITLE"
     MERGE_SHA=$(echo "$RESP" | jq -r .sha)
     # Notion must learn the ticket shipped, or the night build will rebuild it.
     TICKET=$(echo "$TITLE" | grep -oE "^TT-[0-9]+")

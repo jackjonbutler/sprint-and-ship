@@ -33,4 +33,5 @@ done
 [ -n "${MERGE_TRAIN_REPO:-}" ] && bin/merge-train.sh "$MERGE_TRAIN_REPO" "${MERGE_TRAIN_BASE:-development}" || true
 
 event night-build loop-end "\"built\":$BUILT,\"asked\":$ASKED"
+status_note "🌅 night build done — $BUILT built, $ASKED waiting on you"
 tg "🌅 <b>Night build done</b> — $BUILT PR(s) ready for review, $ASKED question(s) waiting. Morning review time."

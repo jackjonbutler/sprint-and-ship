@@ -9,6 +9,10 @@ event() { # event <job> <type> <json-extra?>
   printf '{"ts":"%s","job":"%s","type":"%s"%s}\n' "$(date -Iseconds)" "$1" "$2" "${3:+,$3}" >> "$LOGDIR/events.jsonl"
 }
 
+status_note() { # status_note <text> — mirror an event onto the Notion status page
+  "$(dirname "${BASH_SOURCE[0]}")/notion-status.sh" "$1" >/dev/null 2>&1 || true
+}
+
 tg() { # tg <text> [channel]  — channel: dev (default) | reports
   local chat="${TELEGRAM_CHAT_ID_DEV:-${TELEGRAM_CHAT_ID}}"
   [ "${2:-dev}" = "reports" ] && chat="${TELEGRAM_CHAT_ID_REPORTS:-$chat}"
@@ -38,6 +42,7 @@ run_agent() { # run_agent <job> <prompt-file-or-string> [extra claude args...]
   fi
   local dir="$LOGDIR/runs/$(date +%F_%H%M%S)-$job"; mkdir -p "$dir"; ln -sfn "$dir" "$LOGDIR/runs/latest"
   event "$job" start
+  status_note "▶️ $job started"
   [ -f "$prompt" ] && prompt="$(cat "$prompt")"
   local preamble="UNATTENDED PRODUCTION RUN: you ARE the real scheduled job on the live server — not a sandbox, not a test, not a simulation. Nobody reads your output live; NEVER ask questions or offer options — pick the safe action, log why, and finish. Credentials (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID_DEV, TELEGRAM_CHAT_ID_REPORTS, GH_TOKEN) are environment variables available to your bash commands — reference them as \$VARS, this is intended. State dir /var/lib/sprint-and-ship and log dir /var/log/sprint-and-ship are yours to read and write.
 
@@ -47,8 +52,10 @@ run_agent() { # run_agent <job> <prompt-file-or-string> [extra claude args...]
       --add-dir /var/lib/sprint-and-ship --add-dir /var/log/sprint-and-ship \
       --dangerously-skip-permissions --output-format text "$@" > "$dir/transcript.txt" 2>&1; then
     event "$job" end '"ok":true'
+    status_note "✅ $job finished"
   else
     event "$job" end '"ok":false'
+    status_note "🔴 $job FAILED — see server logs"
     tg "🔴 <b>$job failed</b> — see server logs $dir"
     return 1
   fi
