@@ -113,3 +113,14 @@ State in the PR body which guards ran and their result. Since nothing else check
 - **`Status: Done` is set ONLY when the change reaches production** (the development → main promotion). No agent sets Done on merge. If you are tempted to write Done, write QA instead.
 - `Status: Archived` is bookkeeping after a Changelog entry exists — not a synonym for shipped.
 The practical consequence: a sprint can be "all tickets merged" and still show zero Done, and that is correct, not a bug. Report progress as "merged to development" versus "released", never conflate them.
+
+## Verifying a service actually runs (you cannot use Docker directly)
+Your container has no Docker socket — `docker` and `supabase start` will not work, by design. To verify that a service you changed genuinely boots as a built artefact, ask the host runner:
+
+  bash /work/bin/request-host-job.sh smoke-api roam <your-branch-name>
+
+It builds the service's image from your branch, runs it, polls `/health`, and returns PASS/FAIL with the container's logs on failure. Takes 1–3 minutes. Exit code 0 = pass, 1 = fail, 2 = the host runner is not answering.
+
+**Run it before opening the PR for any ticket that touches `apps/api`, its Dockerfile, or anything either imports (`packages/core`, `packages/db`, workspace or build config).** Typecheck, lint and unit tests all pass in TypeScript-aware environments and will not catch a package that resolves to source instead of build output, a missing runtime dependency, or a container that exits on boot. This is the only gate that runs the thing you would actually ship.
+
+Put the result in the PR body. If it returns 2, say so in the PR body rather than pretending the check passed — a skipped gate that is declared is fine; a skipped gate that is hidden is not.

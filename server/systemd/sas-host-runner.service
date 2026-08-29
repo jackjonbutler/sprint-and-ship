@@ -1,0 +1,14 @@
+[Unit]
+Description=sprint-and-ship host job runner (Docker-dependent jobs, outside the agent container)
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStart=/opt/sprint-and-ship/server/bin/host-runner.sh
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/sprint-and-ship-host-runner.log
+StandardError=append:/var/log/sprint-and-ship-host-runner.log
+
+[Install]
+WantedBy=multi-user.target
