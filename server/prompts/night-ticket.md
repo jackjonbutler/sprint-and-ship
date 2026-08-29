@@ -80,3 +80,18 @@ Setting `AI Stage = Blocked` is not enough — the board's `Status` must still d
 - **Work is on a branch but no PR** (stopped mid-build) → leave `Status = In progress`. It is genuinely half-done.
 - **Nothing pushed** (blocked before any code) → set `Status` back to `Not started`. Nothing is in flight.
 Say which of these three applies in your Telegram message and your Notion comment, so the human knows whether they are being asked to review something or to unblock something.
+
+## Blocked means ASKED — never NEXT (HARD RULE)
+If you set a ticket's AI Stage to "Blocked" for ANY reason, then in the same run you MUST:
+1. Send the Telegram message (the decision format above) BEFORE finishing. Not optional, not "the summary covers it".
+2. Print `RESULT:ASKED` as your final marker — never `RESULT:NEXT`. `RESULT:NEXT` means "this ticket is complete and needs nothing from a human". A blocked ticket is by definition not that.
+A ticket can be *both* "built, tests green, PR open" and blocked — that is the normal case for infrastructure gaps. It is still ASKED, because a human must act before it can finish.
+
+Your Telegram message for an infrastructure block must answer, in this order:
+- **What is blocked**: TT-nnn and its title.
+- **What was achieved anyway**: e.g. "code complete, 14/14 tests, PR #10 open and reviewable".
+- **What is missing, in plain words**: name the thing, and say what it IS if it may be unfamiliar ("Fly.io — the hosting platform this service deploys to; the plan chose it in step 9").
+- **Why it is needed**: which acceptance criteria it unblocks.
+- **Exactly what the human must do**: click-by-click, including where to put any credential.
+- **The alternative**: what happens if they'd rather not — usually "reply `TT-nnn: skip the deploy step` and I'll merge the code as-is and leave deployment to a later ticket".
+Never assume the human knows why a third-party service is in the plan. They did not write the plan; you did.

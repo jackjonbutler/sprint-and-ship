@@ -13,6 +13,17 @@ for i in $(seq 1 "${MAX_TICKETS_PER_NIGHT:-6}"); do
   if run_agent "night-build-$i" /work/prompts/night-ticket.md; then
     # agent exits with a final line we parse from transcript: NEXT | EMPTY | ASKED | FAILED
     last=$(grep -ohE 'RESULT:(NEXT|EMPTY|ASKED|FAILED)' "$LOGDIR/runs/latest/transcript.txt" 2>/dev/null | tail -1 || true)
+    # SAFETY NET: if the transcript says a ticket was blocked but the agent reported
+    # success, the human never gets told. Catch it here rather than trusting the prompt.
+    TR="$LOGDIR/runs/latest/transcript.txt"
+    if [ "$last" = "RESULT:NEXT" ] && grep -qiE "set .*(AI Stage|stage).*(to )?.?Blocked|AI Stage *(=|:|->) *.?Blocked" "$TR" 2>/dev/null; then
+      TICK=$(grep -ohE "TT-[0-9]+" "$TR" | tail -1)
+      WHY=$(grep -ihE "blocked" "$TR" | grep -viE "^#" | tail -1 | cut -c1-320)
+      tg "⚠️ <b>${TICK:-A ticket} was blocked but reported as complete</b> — you were not told, so here it is:%0A%0A$(printf '%s' "$WHY" | sed 's/[<>&]//g')%0A%0AOpen the ticket in Notion for the full reason. (This message came from the pipeline's safety net, not the agent — logged as a pipeline defect.)"
+      event night-build notify-gap "\"ticket\":\"$TICK\""
+      status_note "⚠️ ${TICK:-ticket} blocked but reported complete — safety net notified"
+      last="RESULT:ASKED"
+    fi
     case "$last" in
       RESULT:EMPTY) break ;;
       RESULT:ASKED) ASKED=$((ASKED+1)) ;;
