@@ -40,3 +40,11 @@ curl -s -X POST https://api.notion.com/v1/comments \
   -d '{"parent":{"page_id":"<PAGE_ID>"},"rich_text":[{"type":"text","text":{"content":"<your comment>"}}]}'
 
 Page IDs are the 32-hex id in the ticket URL. Only fall back to appending to the page body if this also fails, and say so in your report.
+
+## Status lifecycle — what "Done" actually means here (IMPORTANT)
+`development` is not production. Jack tests the app himself and then deliberately promotes `development` → `main`. Therefore:
+- Ticket building → `Status: In progress`
+- PR open, or merged into `development` → **`Status: QA`**. This is where a ticket sits after the merge train lands it: the code is in, but nobody has used it yet.
+- **`Status: Done` is set ONLY when the change reaches production** (the development → main promotion). No agent sets Done on merge. If you are tempted to write Done, write QA instead.
+- `Status: Archived` is bookkeeping after a Changelog entry exists — not a synonym for shipped.
+The practical consequence: a sprint can be "all tickets merged" and still show zero Done, and that is correct, not a bug. Report progress as "merged to development" versus "released", never conflate them.

@@ -105,3 +105,11 @@ This project has no CI. Several tickets wrote guard scripts expecting CI to run 
 4. If a guard fails, treat it as a failing test — fix it or block the ticket. Never open a PR with a known-failing guard and a note about it.
 
 State in the PR body which guards ran and their result. Since nothing else checks this code before it merges, that list is the only evidence a human gets.
+
+## Status lifecycle — what "Done" actually means here (IMPORTANT)
+`development` is not production. Jack tests the app himself and then deliberately promotes `development` → `main`. Therefore:
+- Ticket building → `Status: In progress`
+- PR open, or merged into `development` → **`Status: QA`**. This is where a ticket sits after the merge train lands it: the code is in, but nobody has used it yet.
+- **`Status: Done` is set ONLY when the change reaches production** (the development → main promotion). No agent sets Done on merge. If you are tempted to write Done, write QA instead.
+- `Status: Archived` is bookkeeping after a Changelog entry exists — not a synonym for shipped.
+The practical consequence: a sprint can be "all tickets merged" and still show zero Done, and that is correct, not a bug. Report progress as "merged to development" versus "released", never conflate them.

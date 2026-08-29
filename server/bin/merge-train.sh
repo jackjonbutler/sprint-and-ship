@@ -94,7 +94,7 @@ while :; do
     TICKET=$(echo "$TITLE" | grep -oE "^TT-[0-9]+")
     if [ -n "$TICKET" ] && [ -n "${NOTION_TOKEN:-}" ]; then
       MERGE_SHA="$MERGE_SHA" TICKET="$TICKET" PRNUM="$NUM" run_agent "notion-close-$TICKET" \
-        "Ticket $TICKET was just merged into $BASE as $MERGE_SHA (PR #$PRNUM). In Notion Tasks - Tech: set that ticket's Status to \"Done\" and clear its AI Stage, and add a comment recording the merge SHA, the PR number, and that it ships with the next $BASE to production release. Change nothing else. If the comment API errors, still make the property changes and report the failure. This is bookkeeping only — do not touch code." \
+        "Ticket $TICKET was just merged into $BASE as $MERGE_SHA (PR #$PRNUM). In Notion Tasks - Tech: set that ticket's Status to \"QA\" (NOT Done) and clear its AI Stage, then add a comment recording the merge SHA and PR number. Merging to $BASE means \"ready for Jack to test\" \u2014 it does NOT mean done. A ticket only becomes Done when Jack promotes $BASE to production, which is a separate deliberate step he performs. Never set Done here. Change nothing else. If the comment API errors, still make the property changes and report the failure. This is bookkeeping only — do not touch code." \
         > /dev/null 2>&1 || event merge-train notion-update-failed "\"pr\":$NUM,\"ticket\":\"$TICKET\""
     fi
     merged=$((merged+1))
