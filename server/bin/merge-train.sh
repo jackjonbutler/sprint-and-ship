@@ -93,9 +93,13 @@ while :; do
     # Notion must learn the ticket shipped, or the night build will rebuild it.
     TICKET=$(echo "$TITLE" | grep -oE "^TT-[0-9]+")
     if [ -n "$TICKET" ] && [ -n "${NOTION_TOKEN:-}" ]; then
-      MERGE_SHA="$MERGE_SHA" TICKET="$TICKET" PRNUM="$NUM" run_agent "notion-close-$TICKET" \
-        "Ticket $TICKET was just merged into $BASE as $MERGE_SHA (PR #$PRNUM). In Notion Tasks - Tech: set that ticket's Status to \"QA\" (NOT Done) and clear its AI Stage, then add a comment recording the merge SHA and PR number. Merging to $BASE means \"ready for Jack to test\" \u2014 it does NOT mean done. A ticket only becomes Done when Jack promotes $BASE to production, which is a separate deliberate step he performs. Never set Done here. Change nothing else. If the comment API errors, still make the property changes and report the failure. This is bookkeeping only — do not touch code." \
-        > /dev/null 2>&1 || event merge-train notion-update-failed "\"pr\":$NUM,\"ticket\":\"$TICKET\""
+      run_agent "notion-close-$TICKET" \
+        "Ticket $TICKET was just merged into $BASE as $MERGE_SHA (PR #$NUM). In Notion Tasks - Tech: set that ticket's Status to \"QA\" (NOT Done) and clear its AI Stage, then add a comment recording the merge SHA and PR number. Merging to $BASE means \"ready for Jack to test\" \u2014 it does NOT mean done. A ticket only becomes Done when Jack promotes $BASE to production, which is a separate deliberate step he performs. Never set Done here. Change nothing else. If the comment API errors, still make the property changes and report the failure. This is bookkeeping only — do not touch code." \
+        > /dev/null 2>&1 || {
+          # Silent bookkeeping failure = the night build rebuilds a ticket that already shipped.
+          event merge-train notion-update-failed "\"pr\":$NUM,\"ticket\":\"$TICKET\""
+          tg "⚠️ <b>$TICKET</b> merged as PR #$NUM but its Notion status was NOT updated. Set it to QA by hand, or the next build may redo it."
+        }
     fi
     merged=$((merged+1))
   else
