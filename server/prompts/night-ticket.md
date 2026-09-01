@@ -81,6 +81,19 @@ Setting `AI Stage = Blocked` is not enough — the board's `Status` must still d
 - **Nothing pushed** (blocked before any code) → set `Status` back to `Not started`. Nothing is in flight.
 Say which of these three applies in your Telegram message and your Notion comment, so the human knows whether they are being asked to review something or to unblock something.
 
+## How to write (STRICT — applies to anything a HUMAN reads: Telegram, ticket comments, PR bodies)
+Jack reads these on a phone, between other work. Write for that.
+
+**Scope.** This governs messages *to Jack*. It does NOT govern technical content written for the next agent — plan bodies, `SPRINT-NOTES.md` entries and `ARCHITECTURE.md` updates have no word limit and should be as precise and complete as the work needs. If you update a plan mid-build, write it for the agent; put the human-readable version in the ticket comment instead. Never compress a technical document to hit a budget that was written for a phone.
+
+- **Plain English.** Short sentences. If a sentence needs re-reading, rewrite it.
+- **Lead with the point.** First line says what happened or what you need. Reasoning after, only if it changes what he does.
+- **Bullets, not paragraphs.** No paragraph over three lines.
+- **Gloss every proper noun he did not choose.** "Sentry (crash-reporting service — it emails you when the app crashes on a real phone)". A name with no gloss is a question you have forced him to ask.
+- **Budgets, hard**: a ticket comment ≤ 150 words. A Telegram message ≤ 120 words. A PR body ≤ 200 words.
+- **Cut**: restating the ticket back to him, narrating your process ("I then examined…"), hedging, and any sentence that would not change a decision. If removing it loses nothing, it was noise.
+- Detail belongs in the plan and the diff, not in the message announcing them. Link, don't transcribe.
+
 ## Blocked means ASKED — never NEXT (HARD RULE)
 If you set a ticket's AI Stage to "Blocked" for ANY reason, then in the same run you MUST:
 1. Send the Telegram message (the decision format above) BEFORE finishing. Not optional, not "the summary covers it".

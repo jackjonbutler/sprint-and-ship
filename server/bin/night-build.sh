@@ -8,7 +8,11 @@ FAILS=0; BUILT=0; ASKED=0
 # start from an up-to-date base instead of stacking on unmerged work.
 [ -n "${MERGE_TRAIN_REPO:-}" ] && bin/merge-train.sh "$MERGE_TRAIN_REPO" "${MERGE_TRAIN_BASE:-development}" || true
 
-for i in $(seq 1 "${MAX_TICKETS_PER_NIGHT:-6}"); do
+# Unbounded by default: run until the manifest is exhausted (RESULT:EMPTY) or two
+# consecutive failures. Set MAX_TICKETS_PER_NIGHT to re-impose a ceiling if ever needed.
+i=0
+while [ -z "${MAX_TICKETS_PER_NIGHT:-}" ] || [ "$i" -lt "$MAX_TICKETS_PER_NIGHT" ]; do
+  i=$((i+1))
   # Each iteration is a FRESH context executing exactly one ticket (the ss-next procedure).
   if run_agent "night-build-$i" /work/prompts/night-ticket.md; then
     # agent exits with a final line we parse from transcript: NEXT | EMPTY | ASKED | FAILED
