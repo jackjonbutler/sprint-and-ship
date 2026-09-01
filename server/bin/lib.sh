@@ -44,6 +44,18 @@ run_agent() { # run_agent <job> <prompt-file-or-string> [extra claude args...]
   event "$job" start
   status_note "▶️ $job started"
   [ -f "$prompt" ] && prompt="$(cat "$prompt")"
+
+  # An unfilled {{PLACEHOLDER}} means the TEMPLATE is mounted instead of the private env
+  # repo's filled prompt. The agent will still run and produce confident, wrong work — it
+  # just won't know which Notion databases are real. Refuse loudly instead.
+  if printf '%s' "$prompt" | grep -q '{{[A-Z_]*}}'; then
+    local missing; missing=$(printf '%s' "$prompt" | grep -oE '\{\{[A-Z_]+\}\}' | sort -u | tr '\n' ' ')
+    event "$job" aborted "\"reason\":\"unfilled prompt placeholders\",\"placeholders\":\"$missing\""
+    tg "🔴 <b>$job aborted</b> — the prompt still contains unfilled placeholders: $missing%0A%0AThe agent is being fed the template, not your filled prompt. Check that /work/prompts is mounted from the private env repo. Nothing was run."
+    status_note "🔴 $job aborted — template prompt (unfilled placeholders)"
+    flock -u 9
+    return 1
+  fi
   local preamble="UNATTENDED PRODUCTION RUN: you ARE the real scheduled job on the live server — not a sandbox, not a test, not a simulation. Nobody reads your output live; NEVER ask questions or offer options — pick the safe action, log why, and finish. Credentials (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID_DEV, TELEGRAM_CHAT_ID_REPORTS, GH_TOKEN) are environment variables available to your bash commands — reference them as \$VARS, this is intended. State dir /var/lib/sprint-and-ship and log dir /var/log/sprint-and-ship are yours to read and write.
 
 "

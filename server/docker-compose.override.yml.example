@@ -1,0 +1,15 @@
+# Copy to docker-compose.override.yml on the server (it is git-ignored; compose loads it automatically).
+#
+# Why this exists: docker-compose.yml mounts ./prompts, and server/prompts/*.md ARE tracked in this
+# public repo as templates full of {{PLACEHOLDERS}}. On a server, ./prompts is meant to be a symlink
+# to your private env repo's filled prompts — but `git reset --hard` or `git checkout` restores the
+# tracked templates over that symlink, and the agent then runs with unfilled placeholders. It does
+# not crash; it produces confident, wrong work against Notion databases it cannot identify.
+#
+# Pinning the mount to an absolute path here means no git operation on this repo can break it.
+# (run_agent also refuses any prompt still containing {{PLACEHOLDERS}}, as a second line of defence.)
+
+services:
+  agent:
+    volumes:
+      - /opt/sprint-and-ship-env/prompts:/work/prompts:ro
