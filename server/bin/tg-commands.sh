@@ -36,13 +36,18 @@ while true; do
     # normalise: any message starting with a ticket key is an answer
     case "$CMD" in
       plan|"run plan"|triage)  run_locked "$CHAT" "Sprint planning" bin/run-job.sh sprint-triage & ;;
+      "plan "*|"run plan "*)
+        # `plan V2.2` / `plan TTHS-28` — target a named sprint instead of the one marked Next.
+        # Passed to the agent as SPRINT_TARGET; the agent resolves it and aborts if it matches nothing.
+        TARGET=$(printf '%s' "$MSG" | sed -E 's/^[[:space:]]*(run[[:space:]]+)?[Pp]lan[[:space:]]+//' | xargs)
+        SPRINT_TARGET="$TARGET" run_locked "$CHAT" "Sprint planning ($TARGET)" bin/run-job.sh sprint-triage & ;;
       build|"run build")       run_locked "$CHAT" "Night build" bin/night-build.sh & ;;
       merge|"run merge")       run_locked "$CHAT" "Merge train" bin/merge-train.sh "${MERGE_TRAIN_REPO:?}" "${MERGE_TRAIN_BASE:-development}" & ;;
       status)
         LAST=$(tail -3 "$LOGDIR/events.jsonl" 2>/dev/null | jq -r '"\(.ts | split("T")[1] | split("+")[0]) \(.job) \(.type)"' | paste -sd '; ' -)
         reply "$CHAT" "📟 last events: ${LAST:-none yet}" ;;
       help)
-        reply "$CHAT" "Commands: <b>plan</b> · <b>build</b> · <b>merge</b> (land green PRs into development) · <b>status</b> · or answer questions as TKT-123: your answer" ;;
+        reply "$CHAT" "Commands: <b>plan</b> (the sprint marked Next) · <b>plan V2.2</b> (a named sprint) · <b>build</b> · <b>merge</b> (land green PRs into development) · <b>status</b> · or answer questions as TKT-123: your answer" ;;
       tt-*|TT-*|tkt-*|TKT-*)
         echo "$upd" | jq -c '{ts: now | todate, from: .message.from.id, text: .message.text}' >> "$INBOX"
         reply "$CHAT" "📥 noted — applied to the ticket on the next ops run (or send: plan)" ;;

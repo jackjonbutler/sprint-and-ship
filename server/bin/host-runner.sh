@@ -26,10 +26,31 @@ PY
   rm -f "$QUEUE/$id.request" "$out"
 }
 
+# Every smoke build retags roam-api:smoke, orphaning the previous image (~500MB) and
+# growing the build cache. Unreclaimed, that filled a 38G disk in days and surfaced as
+# a confusing "no space left on device" inside unrelated jobs. Reclaim after every run.
+reclaim() {
+  docker image prune -f >/dev/null 2>&1 || true
+  docker builder prune -f --keep-storage 5GB >/dev/null 2>&1 || true
+}
+
+free_gb() { df -BG --output=avail / 2>/dev/null | tail -1 | tr -dc '0-9'; }
+
 smoke_api() { # smoke_api <repo> <ref> <outfile>
   local repo="$1" ref="$2" out="$3" dir="$REPOS_ROOT/$1"
   {
     echo "== smoke-api: $repo @ $ref =="
+    # Fail with a clear reason rather than letting the build die on ENOSPC halfway.
+    local avail; avail=$(free_gb)
+    if [ -n "$avail" ] && [ "$avail" -lt 8 ]; then
+      echo "only ${avail}G free before build — reclaiming"; reclaim; avail=$(free_gb)
+      echo "after reclaim: ${avail}G free"
+    fi
+    if [ -n "$avail" ] && [ "$avail" -lt 4 ]; then
+      echo "DISK FULL: ${avail}G free after reclaim. This is a host problem, not a code problem —"
+      echo "the build was not attempted. Free space on the build server and re-run."
+      return 1
+    fi
     cd "$dir" || { echo "no such repo dir"; return 1; }
     git fetch --quiet --all --prune || true
     git checkout --quiet --force "$ref" || { echo "cannot checkout $ref"; return 1; }
@@ -73,7 +94,8 @@ while :; do
       smoke-api)
         log "RUN $id smoke-api $repo@$ref"
         if smoke_api "$repo" "$ref" "$out"; then finish "$id" true "$out"; log "OK $id"
-        else finish "$id" false "$out"; log "FAIL $id"; fi ;;
+        else finish "$id" false "$out"; log "FAIL $id"; fi
+        reclaim; log "reclaimed; $(free_gb)G free" ;;
       *)
         log "REJECT $id: unknown job '$job'"; echo "rejected: unknown job" >> "$out"; finish "$id" false "$out" ;;
     esac
