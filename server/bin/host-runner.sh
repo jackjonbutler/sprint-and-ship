@@ -15,6 +15,43 @@ echo "host-runner: watching $QUEUE"
 
 log() { printf '[%s] %s\n' "$(date -Is)" "$*"; }
 
+# Telegram straight from the host (this runner is outside the agent container, so it
+# has no lib.sh). Credentials come from the same private env file everything else uses.
+[ -f /opt/sprint-and-ship-env/.env ] && { set -a; . /opt/sprint-and-ship-env/.env; set +a; }
+tg_host() {
+  [ -n "${TELEGRAM_BOT_TOKEN:-}" ] || return 0
+  curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+    -d chat_id="${TELEGRAM_CHAT_ID_DEV:-${TELEGRAM_CHAT_ID:-}}" -d parse_mode=HTML \
+    --data-urlencode text="$1" >/dev/null 2>&1 || true
+}
+
+# Disk watch. Container builds leak images and cache; left alone they fill the disk and
+# surface as baffling "no space left on device" errors inside unrelated jobs. Check on a
+# timer as well as after each job, so an idle-but-leaking server still gets cleaned.
+DISK_WARN_GB="${DISK_WARN_GB:-6}"     # below this after reclaiming, tell Jack
+DISK_RECLAIM_GB="${DISK_RECLAIM_GB:-10}"  # below this, reclaim
+LAST_DISK_CHECK=0
+DISK_ALERTED=0
+
+disk_watch() {
+  local now; now=$(date +%s)
+  [ $((now - LAST_DISK_CHECK)) -lt 300 ] && return 0   # at most every 5 minutes
+  LAST_DISK_CHECK=$now
+  local free; free=$(free_gb); [ -n "$free" ] || return 0
+  if [ "$free" -lt "$DISK_RECLAIM_GB" ]; then
+    log "disk: ${free}G free — reclaiming"
+    reclaim
+    free=$(free_gb)
+    log "disk: ${free}G free after reclaim"
+    if [ "$free" -lt "$DISK_WARN_GB" ] && [ "$DISK_ALERTED" -eq 0 ]; then
+      tg_host "⚠️ <b>Build server disk low</b> — ${free}G free after automatic cleanup. Docker cleanup can't recover any more; this needs a bigger disk or something deleted by hand. Builds will start failing when it reaches zero."
+      DISK_ALERTED=1
+    fi
+  elif [ "$free" -gt $((DISK_WARN_GB * 2)) ]; then
+    DISK_ALERTED=0    # recovered — re-arm so a future squeeze alerts again
+  fi
+}
+
 finish() { # finish <id> <ok:true|false> <summary-file>
   local id="$1" ok="$2" out="$3"
   python3 - "$QUEUE/$id.result" "$ok" "$out" <<'PY'
@@ -74,6 +111,7 @@ smoke_api() { # smoke_api <repo> <ref> <outfile>
 }
 
 while :; do
+  disk_watch
   shopt -s nullglob
   for req in "$QUEUE"/*.request; do
     id="$(basename "$req" .request)"
@@ -81,6 +119,14 @@ while :; do
     job=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('job',''))" "$req" 2>/dev/null)
     repo=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('repo',''))" "$req" 2>/dev/null)
     ref=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('ref',''))" "$req" 2>/dev/null)
+
+    # `reclaim` takes no repo/ref, so it is handled before those checks. It is still an
+    # allowlisted job name — the agent cannot ask for an arbitrary command here either.
+    if [ "$job" = "reclaim" ]; then
+      log "RUN $id reclaim ($(free_gb)G free)"
+      { echo "before: $(free_gb)G free"; reclaim; echo "after: $(free_gb)G free"; } >> "$out" 2>&1
+      finish "$id" true "$out"; log "OK $id reclaim; $(free_gb)G free"; continue
+    fi
 
     # validate: known job, allowlisted repo, git-safe ref
     if ! printf '%s' " $ALLOWED_REPOS " | grep -q " $repo "; then
