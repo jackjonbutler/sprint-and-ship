@@ -53,6 +53,13 @@ curl -s -X POST "https://api.telegram.org/bot{{TELEGRAM_BOT_TOKEN}}/sendMessage"
 Format: "🗂 <b>Sprint planned — wave N</b>: <n> tickets → Plan Ready" + one line per ticket + "<m> tickets remain — send <b>plan</b> again for the next wave." + any Blocked questions with ticket URLs.
 STOP after this wave even if time remains — a fresh context per wave is the design, not a limitation.
 
+**Print a RESULT marker as the very last line, always.** The runner parses it to decide whether to start another wave, so it must reflect live Notion state, not your intent:
+- `RESULT:MORE` — this wave is planned and at least one ticket in the sprint is still "Needs Plan". Re-check Notion before claiming this.
+- `RESULT:DONE` — every ticket in the sprint is now Plan Ready, Plan Approved, or beyond. Nothing left to plan.
+- `RESULT:ASKED` — you set a ticket Blocked and need a human. The runner stops the loop.
+- `RESULT:FAILED` — you could not complete this wave.
+Before printing DONE, state the count of tickets at each AI Stage. A wrong DONE silently ends the sprint's planning, so it must be evidenced, not assumed.
+
 ## 6. How to raise things with a human (STRICT)
 Anything you surface to the user must be a DECISION THEY CAN MAKE IN ONE MESSAGE. Format each exactly:
   ❓ <b>TKT-nnn — the decision, as a question</b>
