@@ -14,7 +14,17 @@ i=0
 while [ -z "${MAX_TICKETS_PER_NIGHT:-}" ] || [ "$i" -lt "$MAX_TICKETS_PER_NIGHT" ]; do
   i=$((i+1))
   # Each iteration is a FRESH context executing exactly one ticket (the ss-next procedure).
-  if run_agent "night-build-$i" /work/prompts/night-ticket.md; then
+  run_agent "night-build-$i" /work/prompts/night-ticket.md; rc=$?
+  if [ "$rc" -eq 2 ]; then
+    # Model session limit. Not a failure — pause and come back when it resets, rather than
+    # burning the remaining retries and leaving a half-built ticket stranded on its branch.
+    MINS=$(( $(schedule_resume sas-build) / 60 ))
+    event night-build paused '"reason":"session limit"'
+    tg "⏸ <b>Build paused — model session limit reached</b>%0A%0ABuilt $BUILT ticket(s) before pausing. Any part-built ticket stays on its branch at AI Stage Building and will be <b>resumed, not restarted</b>.%0A%0AI'll pick it up automatically in about ${MINS} minutes. No action needed."
+    status_note "⏸ build paused — session limit, auto-resume in ~${MINS}m"
+    break
+  fi
+  if [ "$rc" -eq 0 ]; then
     # agent exits with a final line we parse from transcript: NEXT | EMPTY | ASKED | FAILED
     last=$(grep -ohE 'RESULT:(NEXT|EMPTY|ASKED|FAILED)' "$LOGDIR/runs/latest/transcript.txt" 2>/dev/null | tail -1 || true)
     # SAFETY NET: if the transcript says a ticket was blocked but the agent reported

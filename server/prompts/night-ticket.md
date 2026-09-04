@@ -7,8 +7,13 @@ Notion: sprints collection://{{SPRINTS_DB_COLLECTION_ID}}, tasks collection://{{
 1. **Pick the target ticket from Notion PROPERTIES, using the manifest only for ORDER.**
    a. Identify the sprint with Sprint status "Current". State its name and Sprint ID in your first line of output — if that is not the sprint you expected, stop and say so rather than working the wrong board.
    b. From that sprint's `Tasks` relation (authoritative — never from a page-body list), fetch every ticket and read its live `AI Stage`, `Status` and `Repo`.
-   c. **Target = the ticket with `AI Stage` = "Plan Approved"** whose position is earliest in the "## Execution Order" manifest (fall back to the `Exec order` property, then ticket ID, if the manifest does not list it).
-   d. No ticket is "Plan Approved" → print RESULT:EMPTY and stop.
+   c. **Resume before you start anything new.** A ticket at `AI Stage` = "Building" is not in progress — nothing is running but you. It is the wreckage of a run that was interrupted (almost always by the model session limit), and its work is sitting on its branch. Take the earliest such ticket FIRST, and resume it rather than restarting it:
+      - Check out its existing `Branch`. Never cut a fresh branch and never discard commits already on it.
+      - Read what is already there (`git log origin/development..HEAD`, `git status`) and diff it against the plan to find the exact point it stopped.
+      - Finish only what remains, then run the full gate — tests, typecheck, lint — before the normal QA and review steps. Interrupted branches are frequently mid-edit and do not compile; that is expected, not a reason to start over.
+      - If the branch has a commit whose message begins `WIP`, that commit's message names precisely what was left undone. Trust it and start there.
+   d. **Target = the ticket with `AI Stage` = "Plan Approved"** whose position is earliest in the "## Execution Order" manifest (fall back to the `Exec order` property, then ticket ID, if the manifest does not list it) — only once no "Building" ticket remains.
+   e. Nothing at "Building" or "Plan Approved" → print RESULT:EMPTY and stop.
 
    The manifest is a TABLE and carries no checkboxes — never infer completion from it, and never treat "no unchecked line" as "sprint finished". A ticket's `AI Stage` is the only truth about whether it still needs building: "Plan Approved" = build it; "PR Open"/"Building"/"Blocked"/empty = leave it alone. Before printing RESULT:EMPTY you MUST state the count of tickets you saw at each AI Stage, so a wrong answer is visible rather than silent.
 2. Run the ss-next procedure on it (gates incl. Plan Approved; branch off origin/DEFAULT_BRANCH in that repo's clone; build per plan honoring "### Depends on"; repo TEST_CMD + LINT_CMD; qa-verifier then code-reviewer subagents; push; gh pr create to DEFAULT_BRANCH; Notion transitions; manifest update).

@@ -120,6 +120,29 @@ while :; do
     repo=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('repo',''))" "$req" 2>/dev/null)
     ref=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('ref',''))" "$req" 2>/dev/null)
 
+    # `schedule-resume` restarts a job once the model session limit resets. The container has
+    # no systemd, so it asks here. Still allowlisted: only these two units, only a sane delay —
+    # the agent cannot name an arbitrary unit or command.
+    if [ "$job" = "schedule-resume" ]; then
+      unit=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('unit',''))" "$req" 2>/dev/null)
+      secs=$(python3 -c "import json,sys;print(int(json.load(open(sys.argv[1])).get('in_seconds',0)))" "$req" 2>/dev/null)
+      case "$unit" in
+        sas-build|sas-triage) : ;;
+        *) log "REJECT $id: unit '$unit' not allowed"; echo "rejected: unit not allowed" >> "$out"; finish "$id" false "$out"; continue ;;
+      esac
+      if ! [ "$secs" -ge 60 ] 2>/dev/null || [ "$secs" -gt 86400 ]; then
+        log "REJECT $id: delay ${secs}s out of range"; echo "rejected: delay out of range" >> "$out"; finish "$id" false "$out"; continue
+      fi
+      if systemd-run --quiet --on-active="${secs}s" --unit="sas-resume-$(date +%s)" \
+           systemctl start "$unit" 2>>"$out"; then
+        echo "resume of $unit scheduled in ${secs}s" >> "$out"
+        log "OK $id schedule-resume $unit in ${secs}s"; finish "$id" true "$out"
+      else
+        log "FAIL $id schedule-resume $unit"; finish "$id" false "$out"
+      fi
+      continue
+    fi
+
     # `reclaim` takes no repo/ref, so it is handled before those checks. It is still an
     # allowlisted job name — the agent cannot ask for an arbitrary command here either.
     if [ "$job" = "reclaim" ]; then
