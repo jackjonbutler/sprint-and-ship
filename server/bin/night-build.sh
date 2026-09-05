@@ -2,6 +2,17 @@
 # Overnight build loop: one fresh agent invocation per manifest ticket.
 source "$(dirname "$0")/lib.sh"
 sync_repos
+# Refuse to start if another run is already active. Without this, a timer-launched run would
+# queue on the lock, time out after 5 minutes, "skip", and then parse RESULT from the OTHER
+# run's transcript — reporting someone else's outcome as its own.
+exec 8>"$STATEDIR/agent.lock"
+if ! flock -n 8; then
+  event night-build skipped '"reason":"another run is already active"'
+  echo "another build run is already active — exiting rather than contending for the lock"
+  exit 0
+fi
+flock -u 8; exec 8>&-
+
 event night-build loop-start
 FAILS=0; BUILT=0; ASKED=0
 # Land whatever is already reviewed-and-green first, so tonight's branches
