@@ -14,7 +14,11 @@ i=0
 while [ -z "${MAX_TICKETS_PER_NIGHT:-}" ] || [ "$i" -lt "$MAX_TICKETS_PER_NIGHT" ]; do
   i=$((i+1))
   # Each iteration is a FRESH context executing exactly one ticket (the ss-next procedure).
-  run_agent "night-build-$i" /work/prompts/night-ticket.md; rc=$?
+  # `cmd; rc=$?` is WRONG here: under `set -e` a non-zero return kills the script before rc is
+  # ever read, which silently made the session-limit pause below unreachable. `|| rc=$?` is the
+  # form that survives set -e.
+  rc=0
+  run_agent "night-build-$i" /work/prompts/night-ticket.md || rc=$?
   if [ "$rc" -eq 2 ]; then
     # Model session limit. Not a failure — pause and come back when it resets, rather than
     # burning the remaining retries and leaving a half-built ticket stranded on its branch.

@@ -17,7 +17,10 @@ FAILS=0; WAVES=0
 i=0
 while [ "$i" -lt "${MAX_PLAN_WAVES:-12}" ]; do
   i=$((i+1))
-  run_agent "sprint-triage-$i" /work/prompts/sprint-triage.md; rc=$?
+  # `|| rc=$?`, not `; rc=$?` — under `set -e` the latter exits before rc is read, which made
+  # the session-limit pause below dead code.
+  rc=0
+  run_agent "sprint-triage-$i" /work/prompts/sprint-triage.md || rc=$?
   if [ "$rc" -eq 2 ]; then
     MINS=$(( $(schedule_resume sas-triage) / 60 ))
     event plan-sprint paused '"reason":"session limit"'
