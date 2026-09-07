@@ -112,6 +112,12 @@ Which to use, by repo:
   audit, `find-animation-opportunities` to spot what should move and, just as importantly, what
   should not.
 
+**If the ticket has a `### Design references` section, that is direction, not decoration.** It was
+added by a human from a real reference library (Mobbin), which you have no access to. Follow it over
+your own instinct about layout and interaction, and say in the PR body how it shaped what you built.
+If it conflicts with a craft skill, the reference wins on *what* the thing looks like and the skill
+wins on *how it moves* — and say so rather than silently picking one.
+
 Rules:
 - State in the PR body which craft skills you used and what they changed about your approach. "Used
   animate-expo" with no consequence means you did not really use it.

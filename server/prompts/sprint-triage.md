@@ -44,6 +44,25 @@ Rules for the TL;DR only:
 
 Everything below the TL;DR follows the normal plan structure and is as detailed as the work demands. Still true regardless of length: every step names the exact file(s) it touches, acceptance criteria stay testable checkboxes, and "### Depends on" and real conflicts are always declared.
 
+## Design tickets: ask for the references you need (STRICT)
+You have no access to Mobbin or any design-reference library — that lives with Jack, outside this
+server. What you CAN do is say precisely what would help, so it can be fetched and pasted back.
+
+For any ticket whose main output is something a user looks at — a screen, sheet, component,
+transition, empty or loading state — end its plan with:
+
+  ### Reference requests
+  - <2 to 4 specific searches, each naming the pattern and the context>
+
+Make them searchable, not vague. "Group chat with inline polls, messaging apps" is useful;
+"good chat UI" is not. Name the interaction you are unsure about, not the whole screen.
+
+If the ticket page already has a `### Design references` section, it was added by a human with a
+real reference library. Treat it as direction, fold it into your Approach, and do not add
+Reference requests for anything it already answers.
+
+Skip this entirely for migrations, queries, services and other work with no visual surface.
+
 ## Where things go on the sprint page (STRICT)
 The inline Tasks board (the kanban) must stay the FIRST thing on the sprint page. Everything you write — the manifest, "### Shared surfaces", "### Planning progress" — goes BELOW it, appended to the end of the page. Never insert a block above the board, and never reorder or replace it. If you find your own earlier writing sitting above the board, move it below.
 
