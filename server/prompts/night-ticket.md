@@ -92,6 +92,36 @@ Setting `AI Stage = Blocked` is not enough — the board's `Status` must still d
 - **Nothing pushed** (blocked before any code) → set `Status` back to `Not started`. Nothing is in flight.
 Say which of these three applies in your Telegram message and your Notion comment, so the human knows whether they are being asked to review something or to unblock something.
 
+## Design and animation work — use the craft skills, always (STRICT)
+Any ticket that adds or changes something a user looks at or interacts with — a screen, a sheet, a
+component, a transition, a loading or empty state — is design work, not just code. Agents reliably
+produce interfaces that function and still feel wrong: the wrong easing, a solid border where a soft
+shadow belongs, motion that draws attention to the wrong thing. These skills exist to stop that.
+
+**Load the relevant skill BEFORE writing UI code, not as a review afterwards.** Choosing the wrong
+easing then reviewing it is slower than choosing right first.
+
+Which to use, by repo:
+- **v2 / Roam (Expo, React Native)** — `animate-expo` for any motion; `apple-design` for how it
+  should feel; `emil-design-eng` for polish and component decisions; `animation-vocabulary` when the
+  ticket describes an effect vaguely and you need the real name for it.
+  Do NOT use `animate` or `ask-sonner` here — those are web/CSS and their advice does not transfer.
+- **web frontend / brochure site / relaunch site (Next.js)** — `animate`, `apple-design`,
+  `emil-design-eng`, `pick-ui-library` when choosing a dependency, `ask-sonner` for toasts.
+- **Reviewing existing UI** — `review-animations` against its STANDARDS, `improve-animations` for an
+  audit, `find-animation-opportunities` to spot what should move and, just as importantly, what
+  should not.
+
+Rules:
+- State in the PR body which craft skills you used and what they changed about your approach. "Used
+  animate-expo" with no consequence means you did not really use it.
+- These skills are opinionated on purpose. Where one contradicts your instinct, follow the skill —
+  that is the entire reason it is here. Where one contradicts the ticket's own explicit design
+  decision, the ticket wins; say so in the PR body rather than silently overriding either.
+- Not every ticket is design work. A migration, a query, a service module: skip this section
+  entirely rather than inventing motion nobody asked for. `find-animation-opportunities` is
+  explicitly also about rejecting things that should not animate.
+
 ## How to write (STRICT — applies to anything a HUMAN reads: Telegram, ticket comments, PR bodies)
 Jack reads these on a phone, between other work. Write for that.
 
