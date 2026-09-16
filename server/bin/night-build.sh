@@ -62,6 +62,18 @@ while [ -z "${MAX_TICKETS_PER_NIGHT:-}" ] || [ "$i" -lt "$MAX_TICKETS_PER_NIGHT"
         # Dependency-ordered manifests need this: otherwise ticket N+1 skips as "waiting".
         [ -n "${MERGE_TRAIN_REPO:-}" ] && bin/merge-train.sh "$MERGE_TRAIN_REPO" "${MERGE_TRAIN_BASE:-development}" || true
         ;;
+      "")
+        # The agent exited 0 but printed no RESULT marker — it ended its turn mid-protocol
+        # (typically while waiting on a subagent) instead of finishing the ticket. The work is
+        # usually complete and pushed; what is missing is the PR and the Notion transition.
+        # Reported distinctly because "no marker" and "the ticket failed" need different actions:
+        # this one wants resuming, not re-running from scratch.
+        TICK=$(grep -ohE "TT-[0-9]+" "$LOGDIR/runs/latest/transcript.txt" 2>/dev/null | tail -1)
+        LASTLINE=$(tail -c 300 "$LOGDIR/runs/latest/transcript.txt" 2>/dev/null | tr -d '<>&' | tail -1)
+        event night-build no-result "\"ticket\":\"${TICK:-unknown}\""
+        tg "⚠️ <b>${TICK:-A ticket} stopped mid-protocol</b> — the agent ended its turn without finishing.%0A%0AIt printed no result, so no PR was opened and Notion was not updated. Any work it did is committed on its branch and it stays at AI Stage Building, so the next <b>build</b> will resume it rather than start over.%0A%0ALast thing it said: <i>${LASTLINE}</i>"
+        status_note "⚠️ ${TICK:-ticket} stopped mid-protocol — no result reported"
+        FAILS=$((FAILS+1)) ;;
       *)            FAILS=$((FAILS+1)) ;;
     esac
   else

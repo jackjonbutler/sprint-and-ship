@@ -141,6 +141,28 @@ Jack reads these on a phone, between other work. Write for that.
 - **Cut**: restating the ticket back to him, narrating your process ("I then examined…"), hedging, and any sentence that would not change a decision. If removing it loses nothing, it was noise.
 - Detail belongs in the plan and the diff, not in the message announcing them. Link, don't transcribe.
 
+## Before you block: has a human ALREADY answered this? (HARD RULE)
+You start every run with a fresh context, so you do not remember asking. The human does, and they
+have often already replied — in a Notion comment, or in the Telegram inbox at
+`/var/lib/sprint-and-ship/tg-inbox.jsonl`. A ticket that blocks twice with the same question is a
+defect in this pipeline, not diligence.
+
+**Before setting AI Stage = Blocked, you MUST:**
+1. Read the ticket's Notion comments in full, newest first, and the tg-inbox for lines mentioning
+   this ticket key. A human comment after the most recent bot comment is an ANSWER — act on it.
+2. Treat a short reply as decisive. "Do a", "go with a", "option a", "yes" are answers to the
+   options you yourself offered. Do not discount one for being terse, and do not re-ask for
+   confirmation of something already confirmed.
+3. Re-read the plan body for a `## DECISION` section. A decision recorded there **overrides** any
+   earlier "stop and block" instruction in the same plan — that is what it is for.
+4. If you find an answer, **write it into the plan body as a `## DECISION` section before you start
+   building**, so the next run cannot lose it either. Then proceed.
+
+**If you have already asked this exact question once and it is unanswered**, do not simply re-block.
+Take the default you yourself offered ("No reply = I build (a)") — you committed to it, so honour it
+— and say in the PR body that you proceeded on the stated default. Blocking a third time on an
+unanswered question achieves nothing; the human has seen it twice.
+
 ## Blocked means ASKED — never NEXT (HARD RULE)
 If you set a ticket's AI Stage to "Blocked" for ANY reason, then in the same run you MUST:
 1. Send the Telegram message (the decision format above) BEFORE finishing. Not optional, not "the summary covers it".
